@@ -670,31 +670,26 @@ function phpbbasic_update_forum_row_data(&$row, $phpbbasic_enabled)
 	}
 }
 
-function phpbbasic_overwrite_template_vars($phpbbasic_enabled, &$template, $data, $page)
+function phpbbasic_overwrite_template_vars($phpbbasic_enabled, &$template, $data)
 {
 	if ($phpbbasic_enabled)
 	{
-		switch ($page)
-		{
-			case 'viewtopic':
-				global $server_path, $viewtopic_url, $auth, $phpbb_root_path, $phpEx;
-				global $start, $u_sort_param, $user;
-				
-				$template->assign_vars(array(
-					'FORUM_NAME'	=> $user->lang['INDEX'],
-					'U_MCP' 		=> ($auth->acl_get('m_', $data['forum_id'])) ? append_sid("{$phpbb_root_path}mcp.$phpEx", "i=main&amp;mode=topic_view&amp;t={$data['topic_id']}&amp;start=$start" . ((strlen($u_sort_param)) ? "&amp;$u_sort_param" : ''), true, $user->session_id) : '',
+		global $server_path, $viewtopic_url, $auth, $phpbb_root_path, $phpEx;
+		global $start, $u_sort_param, $user;
+		
+		$template->assign_vars(array(
+			'FORUM_NAME'	=> $user->lang['INDEX'],
+			'U_MCP' 		=> ($auth->acl_get('m_', $data['forum_id'])) ? append_sid("{$phpbb_root_path}mcp.$phpEx", "i=main&amp;mode=topic_view&amp;t={$data['topic_id']}&amp;start=$start" . ((strlen($u_sort_param)) ? "&amp;$u_sort_param" : ''), true, $user->session_id) : '',
 
-					'S_TOPIC_ACTION' 		=> append_sid("{$phpbb_root_path}viewtopic.$phpEx", "t={$data['topic_id']}&amp;start=$start"),
-					'S_MOD_ACTION' 			=> append_sid("{$phpbb_root_path}mcp.$phpEx", "t={$data['topic_id']}&amp;start=$start&amp;quickmod=1&amp;redirect=" . urlencode(str_replace('&amp;', '&', $viewtopic_url)), true, $user->session_id),
-					'S_VIEWTOPIC'			=> true,
-					'U_TOPIC'				=> "{$server_path}viewtopic.$phpEx?t={$data['topic_id']}",
-					'U_VIEW_FORUM' 			=> append_sid("{$phpbb_root_path}index.$phpEx"),
-					'U_FORUM'				=> false,
-					'U_VIEW_OLDER_TOPIC'	=> append_sid("{$phpbb_root_path}viewtopic.$phpEx", "t={$data['topic_id']}&amp;view=previous"),
-					'U_VIEW_NEWER_TOPIC'	=> append_sid("{$phpbb_root_path}viewtopic.$phpEx", "t={$data['topic_id']}&amp;view=next"))
-				);
-			break;
-		}
+			'S_TOPIC_ACTION' 		=> append_sid("{$phpbb_root_path}viewtopic.$phpEx", "t={$data['topic_id']}&amp;start=$start"),
+			'S_MOD_ACTION' 			=> append_sid("{$phpbb_root_path}mcp.$phpEx", "t={$data['topic_id']}&amp;start=$start&amp;quickmod=1&amp;redirect=" . urlencode(str_replace('&amp;', '&', $viewtopic_url)), true, $user->session_id),
+			'S_VIEWTOPIC'			=> true,
+			'U_TOPIC'				=> "{$server_path}viewtopic.$phpEx?t={$data['topic_id']}",
+			'U_VIEW_FORUM' 			=> append_sid("{$phpbb_root_path}index.$phpEx"),
+			'U_FORUM'				=> false,
+			'U_VIEW_OLDER_TOPIC'	=> append_sid("{$phpbb_root_path}viewtopic.$phpEx", "t={$data['topic_id']}&amp;view=previous"),
+			'U_VIEW_NEWER_TOPIC'	=> append_sid("{$phpbb_root_path}viewtopic.$phpEx", "t={$data['topic_id']}&amp;view=next"))
+		);
 	}
 }
 

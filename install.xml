@@ -148,7 +148,7 @@
 			</edit>
 			<edit>
 				<find><![CDATA[			WHERE parent_id = $this->parent_id]]></find>
-				<action type="after-add"><![CDATA[			WHERE parent_id = $this->parent_id " . (((isset($config['phpbbasic_forumid']) && $config['phpbbasic_forumid']) && $this->parent_id == 0) ? 'AND forum_id = ' . (int) $config['phpbbasic_forumid'] : '') . "]]></action>
+				<action type="replace-with"><![CDATA[			WHERE parent_id = $this->parent_id " . (((isset($config['phpbbasic_forumid']) && $config['phpbbasic_forumid']) && $this->parent_id == 0) ? 'AND forum_id = ' . (int) $config['phpbbasic_forumid'] : '') . "]]></action>
 			</edit>
 			<edit>
 				<find><![CDATA[					'U_SYNC'			=> $url . '&amp;action=sync')
