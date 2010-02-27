@@ -1,0 +1,55 @@
+<!-- INCLUDE overall_header.html -->
+<script type="text/javascript">
+// <![CDATA[
+	onload = function()
+	{
+		<!-- IF not S_PHPBBASIC_ENABLE -->
+		dE('copy_from', -1);
+		<!-- ENDIF -->
+	}
+// ]]>
+</script>
+
+<a name="maincontent"></a>
+
+<h1>{L_ACP_PHPBBASIC_CONFIG}</h1>
+
+<p>{L_ACP_PHPBBASIC_CONFIG_EXPLAIN}</p>
+
+<!-- IF S_ERROR -->
+	<div class="errorbox">
+		<h3>{L_WARNING}</h3>
+		<p>{ERROR_MSG}</p>
+	</div>
+<!-- ENDIF -->
+
+<form id="acp_phpbbasic" method="post" action="{U_ACTION}">
+<fieldset>
+	<legend>{L_PHPBBASIC_OPTIONS}</legend>
+	<dl>
+		<dt><label for="phpbbasic_enable">{L_ENABLE_PHPBBASIC}:</label></dt>
+		<dd><label><input type="radio" name="phpbbasic_enable" value="1"<!-- IF S_PHPBBASIC_ENABLE -->  checked="checked"<!-- ELSE --> onclick="dE('copy_from', 1);"<!-- ENDIF --> class="radio" /> {L_YES}</label>
+		<label><input type="radio" name="phpbbasic_enable" id="phpbbasic_enable" value="0"<!-- IF not S_PHPBBASIC_ENABLE --> checked="checked" onclick="dE('copy_from', -1);"<!-- ENDIF --> class="radio" /> {L_NO}</label></dd>
+	</dl>
+	<!-- IF not S_PHPBBASIC_ENABLE -->
+	<div id="copy_from">
+		<dl>
+			<dt><label for="copy_perm_from">{L_COPY_PERMISSIONS_FROM}:</label><br /><span>{L_COPY_PERMISSIONS_FROM_EXPLAIN}</span></dt>
+			<dd><select id="copy_perm_from" name="copy_perm_from">{S_FORUM_OPTIONS}</select></dd>
+		</dl>
+	</div>
+	<dl>
+		<dt><label for="phpbbasic_single_forum">{L_PHPBBASIC_SINGLE_FORUM}:</label><br /><span>{L_PHPBBASIC_SINGLE_FORUM_EXPLAIN}</span></dt>
+		<dd><label><input type="radio" name="phpbbasic_single_forum" value="1" class="radio" /> {L_YES}</label>
+		<label><input type="radio" name="phpbbasic_single_forum" id="phpbbasic_single_forum" value="0" checked="checked" class="radio" /> {L_NO}</label></dd>
+	</dl>
+	<!-- ENDIF -->
+	<p class="submit-buttons">
+		<input class="button1" type="submit" id="submit" name="submit" value="{L_SUBMIT}" />&nbsp;
+		<input class="button2" type="reset" id="reset" name="reset" value="{L_RESET}" />
+	</p>
+	{S_FORM_TOKEN}
+</fieldset>
+</form>
+
+<!-- INCLUDE overall_footer.html -->
