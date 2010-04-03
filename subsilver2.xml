@@ -20,7 +20,7 @@
 			</author>
 		</author-group>
 		
-		<mod-version>0.0.2</mod-version>
+		<mod-version>0.0.3</mod-version>
 		
 		<installation>
 			<level>intermediate</level>
@@ -41,6 +41,13 @@
 				<rev-version>0.0.2</rev-version>
 				<changelog lang="en-gb">
 					<change>Greatly reduced file edits by copying and simplifying existing modules and files.</change>
+				</changelog>
+			</entry>
+			<entry>
+				<date>2010-04-03</date>
+				<rev-version>0.0.3</rev-version>
+				<changelog lang="en-gb">
+					<change>Adjusted breadcrumbs and removed unneeded code.</change>
 				</changelog>
 			</entry>
 		</history>

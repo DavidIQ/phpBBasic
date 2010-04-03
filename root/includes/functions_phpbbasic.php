@@ -518,7 +518,12 @@ function display_phpbbasic_forum_topics()
 		'TOTAL_TOPICS'	=> ($topics_count == 1) ? $user->lang['VIEW_FORUM_TOPIC'] : sprintf($user->lang['VIEW_FORUM_TOPICS'], $topics_count),
 		'FORUM_NAME'	=> $basic_forum_data['forum_name'],
 	));
-
+	
+	if ($forum_id != $phpbbasic_forumid)
+	{
+		generate_forum_nav($basic_forum_data);
+	}
+	
 	$topic_list = ($store_reverse) ? array_merge($announcement_list, array_reverse($topic_list)) : array_merge($announcement_list, $topic_list);
 	$topic_tracking_info = $tracking_topics = array();
 
@@ -646,6 +651,9 @@ function display_phpbbasic_forum_topics()
 
 }
 
+/**
+* Overwrite template variables more easily
+*/
 function phpbbasic_overwrite_template_vars($phpbbasic_enabled, &$template, $data)
 {
 	if ($phpbbasic_enabled)
@@ -669,6 +677,9 @@ function phpbbasic_overwrite_template_vars($phpbbasic_enabled, &$template, $data
 	}
 }
 
+/**
+* Synchronize forum post and topic counts
+*/
 function phpbbasic_sync()
 {
 	global $db, $config;
