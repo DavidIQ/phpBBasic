@@ -646,28 +646,6 @@ function display_phpbbasic_forum_topics()
 
 }
 
-function phpbbasic_update_forum_row_data(&$row, $phpbbasic_enabled)
-{
-	if ($phpbbasic_enabled)
-	{
-		global $db, $config;
-		//First get the data
-		$sql = 'SELECT *
-				FROM ' . FORUMS_TABLE . '
-				WHERE forum_id = ' . (int) $config['phpbbasic_forumid'];
-		$result = $db->sql_query_limit($sql, 1);
-		$basic_forum = $db->sql_fetchrow($result);
-		$db->sql_freeresult($result);
-		
-		//Now update the old row with the new data
-		foreach ($basic_forum as $column => $value)
-		{
-			$row[$column] = $basic_forum[$column];		
-		}
-		unset($basic_forum);
-	}
-}
-
 function phpbbasic_overwrite_template_vars($phpbbasic_enabled, &$template, $data)
 {
 	if ($phpbbasic_enabled)
@@ -757,6 +735,8 @@ function acp_forums_main($id, $mode, $acp_forums_class)
 	$original_forumid = $forum_id	= request_var('f', 0);
 	$phpbbasic_forumid = (int) $config['phpbbasic_forumid'];
 	$acp_forums_class->parent_id	= request_var('parent_id', 0);
+
+	//Make sure there is no funny business going on with the parent forum id
 	if ($acp_forums_class->parent_id != $phpbbasic_forumid && $acp_forums_class->parent_id > 0)
 	{
 		$acp_forums_class->parent_id = $phpbbasic_forumid;
@@ -781,7 +761,7 @@ function acp_forums_main($id, $mode, $acp_forums_class)
 
 		case 'delete':
 
-			if (!$auth->acl_get('a_forumdel'))
+			if (!$auth->acl_get('a_forumdel') || $forum_id == $phpbbasic_forumid)
 			{
 				trigger_error($user->lang['NO_PERMISSION_FORUM_DELETE'] . adm_back_link($acp_forums_class->u_action . '&amp;parent_id=' . $acp_forums_class->parent_id), E_USER_WARNING);
 			}

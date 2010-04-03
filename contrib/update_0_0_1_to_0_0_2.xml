@@ -217,7 +217,7 @@
 <h2>{FORUM_NAME}</h2>]]></action>
 			</edit>
 		</open>
-		
+		<php-installer>install_phpbbasic.php</php-installer>
 		<diy-instructions lang="en-gb">Open your browser and navigate to your forum root.  Once there place install_phpbbasic.php in the URL and delete once installation completes.</diy-instructions>
 	</action-group>
 </mod>

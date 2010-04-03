@@ -20,7 +20,7 @@
 			</author>
 		</author-group>
 		
-		<mod-version>0.0.2</mod-version>
+		<mod-version>0.0.3</mod-version>
 		
 		<installation>
 			<level>intermediate</level>
@@ -41,6 +41,13 @@
 				<rev-version>0.0.2</rev-version>
 				<changelog lang="en-gb">
 					<change>Greatly reduced file edits by copying and simplifying existing modules and files.</change>
+				</changelog>
+			</entry>
+			<entry>
+				<date>2010-04-03</date>
+				<rev-version>0.0.3</rev-version>
+				<changelog lang="en-gb">
+					<change>Adjusted breadcrumbs and removed unneeded code.</change>
 				</changelog>
 			</entry>
 		</history>
@@ -144,12 +151,99 @@
 	{]]></action>
 			</edit>
 			<edit>
-				<find><![CDATA[		'U_VIEW_FORUM'	=> append_sid("{$phpbb_root_path}viewforum.$phpEx", 'f=' . $forum_data['forum_id']))
-	);]]></find>
-				<action type="after-add"><![CDATA[	}]]></action>
+				<find><![CDATA[		'U_VIEW_FORUM'	=> append_sid("{$phpbb_root_path}viewforum.$phpEx", 'f=' . $forum_data['forum_id']]]></find>
+				<action type="after-add"><![CDATA[	}
+	else
+	{
+		$template->assign_block_vars('navlinks', array(
+			'S_IS_CAT'		=> false,
+			'S_IS_LINK'		=> ($forum_data['forum_type'] == FORUM_LINK) ? true : false,
+			'S_IS_POST'		=> ($forum_data['forum_type'] == FORUM_POST) ? true : false,
+			'FORUM_NAME'	=> $forum_data['forum_name'],
+			'FORUM_ID'		=> $forum_data['forum_id'],
+			'U_VIEW_FORUM'	=> append_sid("{$phpbb_root_path}index.$phpEx", 'f=' . $forum_data['forum_id']))
+		);
+	}]]></action>
+			</edit>
+		</open>
+
+		<open src="index.php">
+			<edit>
+				<find><![CDATA[	'U_MARK_FORUMS'		=> ($user->data['is_registered'] || $config['load_anon_lastread']) ? append_sid("{$phpbb_root_path}index.$phpEx", 'hash=' . generate_link_hash('global') . '&amp;mark=forums') : '',]]></find>
+				<action type="replace-with"><![CDATA[	'S_PHPBBASIC_ENABLED'		=> (isset($config['phpbbasic_forumid']) && $config['phpbbasic_forumid']) ? true: false,
+	'U_MARK_FORUMS'		=> (($user->data['is_registered'] || $config['load_anon_lastread']) && (!isset($config['phpbbasic_forumid']) || !$config['phpbbasic_forumid'])) ? append_sid("{$phpbb_root_path}index.$phpEx", 'hash=' . generate_link_hash('global') . '&amp;mark=forums') : '',]]></action>
 			</edit>
 		</open>
 		
+		<open src="posting.php">
+			<edit>
+				<find><![CDATA[				meta_refresh(3, $redirect_url);]]></find>
+				<action type="replace-with"><![CDATA[				if (isset($config['phpbbasic_forumid']) && $config['phpbbasic_forumid'])
+				{
+					redirect($redirect_url);
+				}
+				else
+				{
+					meta_refresh(3, $redirect_url);
+				}]]></action>
+			</edit>
+		</open>
+		
+		<open src="search.php">
+			<edit>
+				<find><![CDATA[			$view_topic_url_params = "f=$u_forum_id&amp;t=$result_topic_id" . (($u_hilit) ? "&amp;hilit=$u_hilit" : '');]]></find>
+				<action type="replace-with"><![CDATA[			$view_topic_url_params = ((!isset($config['phpbbasic_forumid']) || !$config['phpbbasic_forumid']) ? "f=$u_forum_id&amp;" : '') . "t=$result_topic_id" . (($u_hilit) ? "&amp;hilit=$u_hilit" : '');]]></action>
+			</edit>
+			<edit>
+				<find><![CDATA[				'U_VIEW_FORUM'		=> append_sid("{$phpbb_root_path}viewforum.$phpEx", 'f=' . $forum_id),]]></find>
+				<action type="replace-with"><![CDATA[				'U_VIEW_FORUM'		=> append_sid("{$phpbb_root_path}" . ((isset($config['phpbbasic_forumid']) && $config['phpbbasic_forumid']) ? 'index.' : 'viewforum.') . $phpEx, 'f=' . $forum_id),]]></action>
+			</edit>
+		</open>
+		
+		<open src="viewforum.php">
+			<edit>
+				<find><![CDATA[$start		= request_var('start', 0);]]></find>
+				<action type="after-add"><![CDATA[if (isset($config['phpbbasic_forumid']) && $config['phpbbasic_forumid'])
+{
+	redirect(append_sid("{$phpbb_root_path}index.$phpEx", (($forum_id) ? "f=$forum_id" : "")), False, False);
+}]]></action>
+			</edit>
+		</open>
+		
+		<open src="viewtopic.php">
+			<edit>
+				<find><![CDATA[$voted_id	= request_var('vote_id', array('' => 0));]]></find>
+				<action type="after-add"><![CDATA[include($phpbb_root_path . 'includes/functions_phpbbasic.' . $phpEx);
+if (isset($config['phpbbasic_forumid']) && $config['phpbbasic_forumid'])
+{
+	$forum_id = (int) $config['phpbbasic_forumid'];
+}]]></action>
+			</edit>
+			<edit>
+				<find><![CDATA[				WHERE forum_id = ' . $row['forum_id'] . "]]></find>
+				<action type="replace-with"><![CDATA[				WHERE ' . ((isset($config['phpbbasic_forumid']) && $config['phpbbasic_forumid']) ? '1 = 1' : 'forum_id = ' . $row['forum_id']) . "]]></action>
+			</edit>
+			<edit>
+				<find><![CDATA[$topic_mod .= ($auth->acl_get('m_move', $forum_id) && $topic_data['topic_status'] != ITEM_MOVED) ? '<option value="move">' . $user->lang['MOVE_TOPIC'] . '</option>' : '';]]></find>
+				<action type="replace-with"><![CDATA[if (!isset($config['phpbbasic_forumid']) || !$config['phpbbasic_forumid'])
+{
+	$topic_mod .= ($auth->acl_get('m_move', $forum_id) && $topic_data['topic_status'] != ITEM_MOVED) ? '<option value="move">' . $user->lang['MOVE_TOPIC'] . '</option>' : '';
+}]]></action>
+			</edit>
+			<edit>
+				<find><![CDATA[$topic_mod .= ($auth->acl_get('m_move', $forum_id)) ? '<option value="fork">' . $user->lang['FORK_TOPIC'] . '</option>' : '';]]></find>
+				<action type="replace-with"><![CDATA[if (!isset($config['phpbbasic_forumid']) || !$config['phpbbasic_forumid'])
+{
+	$topic_mod .= ($auth->acl_get('m_move', $forum_id)) ? '<option value="fork">' . $user->lang['FORK_TOPIC'] . '</option>' : '';
+}]]></action>
+			</edit>
+			<edit>
+				<find><![CDATA[// Does this topic contain a poll?
+if (!empty($topic_data['poll_start']))]]></find>
+				<action type="before-add"><![CDATA[phpbbasic_overwrite_template_vars((isset($config['phpbbasic_forumid']) && $config['phpbbasic_forumid']), $template, $topic_data);]]></action>
+			</edit>
+		</open>
+
 		<open src="styles/prosilver/template/index_body.html">
 			<edit>
 				<find><![CDATA[<!-- INCLUDE forumlist_body.html -->]]></find>
@@ -188,88 +282,7 @@
 <!-- ENDIF -->]]></action>
 			</edit>
 		</open>
-		
-		<open src="index.php">
-			<edit>
-				<find><![CDATA[	'U_MARK_FORUMS'		=> ($user->data['is_registered'] || $config['load_anon_lastread']) ? append_sid("{$phpbb_root_path}index.$phpEx", 'hash=' . generate_link_hash('global') . '&amp;mark=forums') : '',]]></find>
-				<action type="replace-with"><![CDATA[	'S_PHPBBASIC_ENABLED'		=> (isset($config['phpbbasic_forumid']) && $config['phpbbasic_forumid']) ? true: false,
-	'U_MARK_FORUMS'		=> (($user->data['is_registered'] || $config['load_anon_lastread']) && (!isset($config['phpbbasic_forumid']) || !$config['phpbbasic_forumid'])) ? append_sid("{$phpbb_root_path}index.$phpEx", 'hash=' . generate_link_hash('global') . '&amp;mark=forums') : '',]]></action>
-			</edit>
-		</open>
-		
-		<open src="posting.php">
-			<edit>
-				<find><![CDATA[				meta_refresh(3, $redirect_url);]]></find>
-				<action type="replace-with"><![CDATA[				if (isset($config['phpbbasic_forumid']) && $config['phpbbasic_forumid'])
-				{
-					redirect($redirect_url);
-				}
-				else
-				{
-					meta_refresh(3, $redirect_url);
-				}]]></action>
-			</edit>
-		</open>
-		
-		<open src="search.php">
-			<edit>
-				<find><![CDATA[			$view_topic_url_params = "f=$u_forum_id&amp;t=$result_topic_id" . (($u_hilit) ? "&amp;hilit=$u_hilit" : '');]]></find>
-				<action type="replace-with"><![CDATA[			$view_topic_url_params = ((!isset($config['phpbbasic_forumid']) || !$config['phpbbasic_forumid']) ? "f=$u_forum_id&amp;" : '') . "t=$result_topic_id" . (($u_hilit) ? "&amp;hilit=$u_hilit" : '');]]></action>
-			</edit>
-			<edit>
-				<find><![CDATA[				'U_VIEW_FORUM'		=> append_sid("{$phpbb_root_path}viewforum.$phpEx", 'f=' . $forum_id),]]></find>
-				<action type="replace-with"><![CDATA[				'U_VIEW_FORUM'		=> append_sid("{$phpbb_root_path}" . ((isset($config['phpbbasic_forumid']) && $config['phpbbasic_forumid']) ? 'index.' : 'viewforum.') . $phpEx, 'f=' . $forum_id),]]></action>
-			</edit>
-		</open>
-		
-		<open src="viewforum.php">
-			<edit>
-				<find><![CDATA[$auth->acl($user->data);]]></find>
-				<action type="after-add"><![CDATA[if (isset($config['phpbbasic_forumid']) && $config['phpbbasic_forumid'])
-{
-	redirect(append_sid("{$phpbb_root_path}index.$phpEx"), False, False);
-}]]></action>
-			</edit>
-		</open>
-		
-		<open src="viewtopic.php">
-			<edit>
-				<find><![CDATA[$voted_id	= request_var('vote_id', array('' => 0));]]></find>
-				<action type="after-add"><![CDATA[include($phpbb_root_path . 'includes/functions_phpbbasic.' . $phpEx);
-if (isset($config['phpbbasic_forumid']) && $config['phpbbasic_forumid'])
-{
-	$forum_id = (int) $config['phpbbasic_forumid'];
-}]]></action>
-			</edit>
-			<edit>
-				<find><![CDATA[				WHERE forum_id = ' . $row['forum_id'] . "]]></find>
-				<action type="replace-with"><![CDATA[				WHERE ' . ((isset($config['phpbbasic_forumid']) && $config['phpbbasic_forumid']) ? '1 = 1' : 'forum_id = ' . $row['forum_id']) . "]]></action>
-			</edit>
-			<edit>
-				<find><![CDATA[$forum_id = (int) $topic_data['forum_id'];]]></find>
-				<action type="before-add"><![CDATA[phpbbasic_update_forum_row_data($topic_data, (isset($config['phpbbasic_forumid']) && $config['phpbbasic_forumid']));]]></action>
-			</edit>
-			<edit>
-				<find><![CDATA[$topic_mod .= ($auth->acl_get('m_move', $forum_id) && $topic_data['topic_status'] != ITEM_MOVED) ? '<option value="move">' . $user->lang['MOVE_TOPIC'] . '</option>' : '';]]></find>
-				<action type="replace-with"><![CDATA[if (!isset($config['phpbbasic_forumid']) || !$config['phpbbasic_forumid'])
-{
-	$topic_mod .= ($auth->acl_get('m_move', $forum_id) && $topic_data['topic_status'] != ITEM_MOVED) ? '<option value="move">' . $user->lang['MOVE_TOPIC'] . '</option>' : '';
-}]]></action>
-			</edit>
-			<edit>
-				<find><![CDATA[$topic_mod .= ($auth->acl_get('m_move', $forum_id)) ? '<option value="fork">' . $user->lang['FORK_TOPIC'] . '</option>' : '';]]></find>
-				<action type="replace-with"><![CDATA[if (!isset($config['phpbbasic_forumid']) || !$config['phpbbasic_forumid'])
-{
-	$topic_mod .= ($auth->acl_get('m_move', $forum_id)) ? '<option value="fork">' . $user->lang['FORK_TOPIC'] . '</option>' : '';
-}]]></action>
-			</edit>
-			<edit>
-				<find><![CDATA[// Does this topic contain a poll?
-if (!empty($topic_data['poll_start']))]]></find>
-				<action type="before-add"><![CDATA[phpbbasic_overwrite_template_vars((isset($config['phpbbasic_forumid']) && $config['phpbbasic_forumid']), $template, $topic_data);]]></action>
-			</edit>
-		</open>
-		
+
 		<php-installer>install_phpbbasic.php</php-installer>
 		
 		<diy-instructions lang="en-gb">Open your browser and navigate to your forum root.  Once there place install_phpbbasic.php in the URL and delete once installation completes.</diy-instructions>
