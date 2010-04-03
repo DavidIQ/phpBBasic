@@ -2,7 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="./modx.prosilver.en.xsl"?>
 <!--For security purposes, please check: http
 ://www.phpbb.com/mods/ for the latest version of this MOD. Although MODs are checked before being allowed in the MODs Database there is no guarantee that there are no security problems within the MOD. No support will be given for MODs not found within the MODs Database which can be found at http://www.phpbb.com/mods/-->
-<mod xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.phpbb.com/mods/xml/modx-1.2.4.xsd">
+<mod xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.phpbb.com/mods/xml/modx-1.2.5.xsd">
 	<header>
 	
 		<license>http://opensource.org/licenses/gpl-license.php GNU General Public License v2</license>
@@ -20,12 +20,12 @@
 			</author>
 		</author-group>
 		
-		<mod-version>0.0.1</mod-version>
+		<mod-version>0.0.2</mod-version>
 		
 		<installation>
 			<level>intermediate</level>
-			<time>1800</time>
-			<target-version>3.0.6</target-version>
+			<time>900</time>
+			<target-version>3.0.7-pl1</target-version>
 		</installation>
 
 		<history>
@@ -36,17 +36,25 @@
 					<change>Initial release. (Beta)</change>
 				</changelog>
 			</entry>
+			<entry>
+				<date>2010-04-03</date>
+				<rev-version>0.0.2</rev-version>
+				<changelog lang="en-gb">
+					<change>Greatly reduced file edits by copying and simplifying existing modules and files.</change>
+				</changelog>
+			</entry>
 		</history>
 		
 		<link-group>
 			<link type="template" lang="en-gb" href="./subsilver2.xml">SubSilver2 Edits</link>
-			<link type="php-installer" lang="en-gb" href="./install_phpbbasic.php">UMIL Installer</link>
+			<link type="contrib" lang="en-gb" href="./contrib/update_0_0_1_to_0_0_2.xml">Update from 0.0.1 to 0.0.2</link>
 		</link-group>
 	</header>
 
 	<action-group>
-
+	
 		<copy>
+			<file from="root/adm/style/acp_forums_phpbbasic.html" to="adm/style/acp_forums_phpbbasic.html" />
 			<file from="root/adm/style/acp_phpbbasic.html" to="adm/style/acp_phpbbasic.html" />
 			<file from="root/includes/functions_phpbbasic.php" to="includes/functions_phpbbasic.php" />
 			<file from="root/includes/acp/acp_phpbbasic.php" to="includes/acp/acp_phpbbasic.php" />
@@ -56,114 +64,15 @@
 			<file from="root/umil/*.*" to="umil/*.*" />
 		</copy>
 		
-		<open src="adm/style/acp_forums.html">
-			<edit>
-				<find><![CDATA[		<dd><select id="parent" name="forum_parent_id"><option value="0"<!-- IF not S_FORUM_PARENT_ID --> selected="selected"<!-- ENDIF -->>{L_NO_PARENT}</option>{S_PARENT_OPTIONS}</select></dd>]]></find>
-				<action type="replace-with"><![CDATA[		<dd><select id="parent" name="forum_parent_id"><!-- IF not S_PHPBBASIC_ENABLED or S_SHOW_NO_PARENT --><option value="0"<!-- IF not S_FORUM_PARENT_ID --> selected="selected"<!-- ENDIF -->>{L_NO_PARENT}</option><!-- ENDIF -->{S_PARENT_OPTIONS}</select></dd>]]></action>
-			</edit>
-			<edit>
-				<find><![CDATA[	<div id="forum_post_options">
-		<fieldset>
-			<legend>{L_GENERAL_FORUM_SETTINGS}</legend>]]></find>
-				<action type="after-add"><![CDATA[		<!-- IF not S_PHBBASIC_ENABLED and not S_HIDE_FORUM_OPTIONS -->]]></action>
-			</edit>
-			<edit>
-				<find><![CDATA[				<label><input type="radio" class="radio" name="display_on_index" value="0"<!-- IF not S_DISPLAY_ON_INDEX --> id="display_on_index" checked="checked"<!-- ENDIF --> /> {L_NO}</label></dd>
-		</dl>]]></find>
-				<action type="after-add"><![CDATA[		<!-- ENDIF -->]]></action>
-			</edit>
-			<edit>
-				<find><![CDATA[				<label><input type="radio" class="radio" name="enable_icons" value="0"<!-- IF not S_TOPIC_ICONS --> id="enable_icons" checked="checked"<!-- ENDIF --> /> {L_NO}</label></dd>
-		</dl>]]></find>
-				<action type="after-add"><![CDATA[		<!-- IF not S_PHBBASIC_ENABLED and not S_HIDE_FORUM_OPTIONS -->]]></action>
-			</edit>
-			<edit>
-				<find><![CDATA[				<label><input type="radio" class="radio" name="display_recent" value="0"<!-- IF not S_DISPLAY_ACTIVE_TOPICS --> id="display_recent" checked="checked"<!-- ENDIF --> /> {L_NO}</label></dd>
-		</dl>]]></find>
-				<action type="after-add"><![CDATA[		<!-- ENDIF -->]]></action>
-			</edit>
-			<edit>
-				<find><![CDATA[	<div id="forum_link_options">
-		<fieldset>
-			<legend>{L_GENERAL_FORUM_SETTINGS}</legend>]]></find>
-				<action type="after-add"><![CDATA[		<!-- IF not S_PHBBASIC_ENABLED -->]]></action>
-			</edit>
-			<edit>
-				<find><![CDATA[				<label><input type="radio" class="radio" name="link_display_on_index" value="0"<!-- IF not S_DISPLAY_ON_INDEX --> id="link_display_on_index" checked="checked"<!-- ENDIF --> /> {L_NO}</label></dd>
-		</dl>]]></find>
-				<action type="after-add"><![CDATA[		<!-- ENDIF -->]]></action>
-			</edit>
-			<edit>
-				<find><![CDATA[	<p><strong>{NAVIGATION}<!-- IF S_NO_FORUMS --> [<a href="{U_EDIT}">{L_EDIT}</a> | <a href="{U_DELETE}">{L_DELETE}</a><!-- IF not S_LINK --> | <a href="{U_SYNC}">{L_RESYNC}</a><!-- ENDIF --->]<!-- ENDIF --></strong></p>]]></find>
-				<action type="replace-with"><![CDATA[	<p><strong>{NAVIGATION}<!-- IF S_NO_FORUMS --> [<a href="{U_EDIT}">{L_EDIT}</a><!-- IF forums.U_DELETE --> | <a href="{U_DELETE}">{L_DELETE}</a><!-- IF not S_LINK --> | <a href="{U_SYNC}">{L_RESYNC}</a><!-- ENDIF ---><!-- ENDIF -->]<!-- ENDIF --></strong></p>]]></action>
-			</edit>
-			<edit>
-				<find><![CDATA[				<td style="vertical-align: top; width: 100px; text-align: right; white-space: nowrap;">]]></find>
-				<action type="replace-with"><![CDATA[				<td style="vertical-align: top; width: <!-- IF not forums.U_DELTE -->75px<!-- ELSE -->100px<!-- ENDIF -->; text-align: right; white-space: nowrap;">]]></action>
-			</edit>
-			<edit>
-				<find><![CDATA[					<a href="{forums.U_DELETE}">{ICON_DELETE}</a>]]></find>
-				<action type="replace-with"><![CDATA[					<!-- IF forums.U_DELETE -->
-					<a href="{forums.U_DELETE}">{ICON_DELETE}</a>
-					<!-- ENDIF -->]]></action>
-			</edit>
-		</open>
-		
 		<open src="includes/acp/acp_forums.php">
 			<edit>
-				<find><![CDATA[					$parents_list = make_forum_select($this->parent_id, false, false, false, false);]]></find>
-				<action type="replace-with"><![CDATA[					$exclude_forums = false;
-					if (isset($config['phpbbasic_forumid']) && $config['phpbbasic_forumid'])
-					{
-						$exclude_forums = array();
-						foreach (get_forum_branch((int) $config['phpbbasic_forumid'], 'children') as $row)
-						{
-							if ($config['phpbbasic_forumid'] != $row['forum_id'])
-							{
-								$exclude_forums[] = $row['forum_id'];
-							}
-						}
-					}
-					$parents_list = make_forum_select($this->parent_id, $exclude_forums, false, false, false);]]></action>
-			</edit>
-			<edit>
-				<find><![CDATA[				$styles_list = style_select($forum_data['forum_style'], true);]]></find>
-				<action type="before-add"><![CDATA[				$f_id = request_var('f', 0);  //Doing this because $forum_id is overwritten with parent_id when it's a new forum
-				if ((isset($config['phpbbasic_forumid']) && $config['phpbbasic_forumid']) && $f_id == (int) $config['phpbbasic_forumid'])
-				{
-					$forum_type_options = '<option value="' . FORUM_POST . '"' . ' selected="selected">' . $user->lang['TYPE_FORUM'] . '</option>';
-				}]]></action>
-			</edit>
-			<edit>
-				<find><![CDATA[					'S_CAN_COPY_PERMISSIONS'	=> ($action != 'edit' || empty($forum_id) || ($auth->acl_get('a_fauth') && $auth->acl_get('a_authusers') && $auth->acl_get('a_authgroups') && $auth->acl_get('a_mauth'))) ? true : false,
-				));]]></find>
-				<action type="after-add"><![CDATA[				if (isset($config['phpbbasic_forumid']) && $config['phpbbasic_forumid'])
-				{
-					$template->assign_vars(array(
-						'S_PHPBBASIC_ENABLED'		=> true,
-						'S_SHOW_NO_PARENT'			=> ($f_id == (int) $config['phpbbasic_forumid']) ? true : false,
-						'S_HIDE_FORUM_OPTIONS'		=> ((!$this->parent_id && !$f_id) || $f_id == (int) $config['phpbbasic_forumid']) ? true : false,
-					));
-				}]]></action>
-			</edit>
-			<edit>
-				<find><![CDATA[			WHERE parent_id = $this->parent_id]]></find>
-				<action type="replace-with"><![CDATA[			WHERE parent_id = $this->parent_id " . (((isset($config['phpbbasic_forumid']) && $config['phpbbasic_forumid']) && $this->parent_id == 0) ? 'AND forum_id = ' . (int) $config['phpbbasic_forumid'] : '') . "]]></action>
-			</edit>
-			<edit>
-				<find><![CDATA[					'U_SYNC'			=> $url . '&amp;action=sync')
-				);]]></find>
-				<action type="after-add"><![CDATA[				if (isset($config['phpbbasic_forumid']) && $config['phpbbasic_forumid'])
-				{
-					$template->alter_block_array('forums', array(
-						'U_MOVE_UP'		=> ($this->parent_id != 0) ? $url . '&amp;action=move_up' : false,
-						'U_MOVE_DOWN'	=> ($this->parent_id != 0) ? $url . '&amp;action=move_down' : false,
-						'U_DELETE'		=> ($this->parent_id != 0) ? $url . '&amp;action=delete' : false), true, 'change');
-				}]]></action>
-			</edit>
-			<edit>
-				<find><![CDATA[			'UA_PROGRESS_BAR'	=> addslashes($this->u_action . '&amp;action=progress_bar'),]]></find>
-				<action type="after-add"><![CDATA[			'S_PHPBBASIC_ENABLED'	=> (isset($config['phpbbasic_forumid']) && $config['phpbbasic_forumid']) ? true : false,]]></action>
+				<find><![CDATA[		global $config, $phpbb_admin_path, $phpbb_root_path, $phpEx;]]></find>
+				<action type="after-add"><![CDATA[		if ((isset($config['phpbbasic_forumid']) && $config['phpbbasic_forumid']))
+		{
+			include($phpbb_root_path . "includes/functions_phpbbasic.$phpEx");
+			acp_forums_main($id, $mode, $this);
+			return;
+		}]]></action>
 			</edit>
 		</open>
 		
@@ -229,21 +138,6 @@
 	}]]></action>
 			</edit>
 			<edit>
-				<find><![CDATA[function generate_forum_rules(&$forum_data)
-{]]></find>
-				<action type="after-add"><![CDATA[	global $config;
-	
-	if ((isset($config['phpbbasic_forumid']) && $config['phpbbasic_forumid']) && $forum_data['forum_id'] != (int) $config['phpbbasic_forumid'])
-	{
-		global $db, $phpbb_root_path, $phpEx;
-		if (!function_exists('phpbbasic_update_forum_row_data'))
-		{
-			include($phpbb_root_path . 'includes/functions_phpbbasic.' . $phpEx);
-		}
-		phpbbasic_update_forum_row_data($forum_data, true);
-	}]]></action>
-			</edit>
-			<edit>
 				<find><![CDATA[	// Get forum parents
 	$forum_parents = get_forum_parents($forum_data);]]></find>
 				<action type="before-add"><![CDATA[	if (!isset($config['phpbbasic_forumid']) || !$config['phpbbasic_forumid'])
@@ -274,7 +168,9 @@
 			</edit>
 			<edit>
 				<find><![CDATA[<h2><a href="{U_VIEW_FORUM}">{FORUM_NAME}</a></h2>]]></find>
-				<action type="after-add"><![CDATA[<!-- ENDIF -->]]></action>
+				<action type="after-add"><![CDATA[<!-- ELSEIF not S_PHPBBASIC_FORUM -->
+<h2>{FORUM_NAME}</h2>
+<!-- ENDIF -->]]></action>
 			</edit>
 			<edit>
 				<find><![CDATA[<!-- INCLUDE jumpbox.html -->]]></find>
@@ -373,6 +269,8 @@ if (!empty($topic_data['poll_start']))]]></find>
 				<action type="before-add"><![CDATA[phpbbasic_overwrite_template_vars((isset($config['phpbbasic_forumid']) && $config['phpbbasic_forumid']), $template, $topic_data);]]></action>
 			</edit>
 		</open>
+		
+		<php-installer>install_phpbbasic.php</php-installer>
 		
 		<diy-instructions lang="en-gb">Open your browser and navigate to your forum root.  Once there place install_phpbbasic.php in the URL and delete once installation completes.</diy-instructions>
 	</action-group>

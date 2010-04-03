@@ -3,7 +3,6 @@
 *
 * @author DavidIQ (David Colon) davidiq@phpbb.com
 * @package umil
-* @version $Id install_phpbbasic.php 0.0.1 2010-02-27 00:38:20GMT DavidIQ $
 * @copyright (c) 2010 DavidIQ
 * @license http://opensource.org/licenses/gpl-license.php GNU Public License
 *
@@ -53,6 +52,7 @@ $versions = array(
 			),
 		),
 	),
+	'0.0.2' => array(),
 );
 
 include($phpbb_root_path . 'umil/umil_auto.' . $phpEx);
