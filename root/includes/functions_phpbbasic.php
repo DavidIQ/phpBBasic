@@ -1,10 +1,8 @@
 <?php
 /**
-*
 * @package phpBBasic
 * @copyright (c) 2010 DavidIQ.com
 * @license http://opensource.org/licenses/gpl-license.php GNU Public License
-*
 */
 
 /**
@@ -92,6 +90,24 @@ function display_phpbbasic_forum_topics()
 	if ($basic_forum_data['forum_password'])
 	{
 		login_forum_box($basic_forum_data);
+	}
+
+	// Is this forum a link? ... User got here either because the
+	// number of clicks is being tracked or they guessed the id
+	if ($basic_forum_data['forum_type'] == FORUM_LINK && $basic_forum_data['forum_link'])
+	{
+		// Does it have click tracking enabled?
+		if ($basic_forum_data['forum_flags'] & FORUM_FLAG_LINK_TRACK)
+		{
+			$sql = 'UPDATE ' . FORUMS_TABLE . '
+				SET forum_posts = forum_posts + 1
+				WHERE forum_id = ' . $forum_id;
+			$db->sql_query($sql);
+		}
+
+		// We redirect to the url. The third parameter indicates that external redirects are allowed.
+		redirect($basic_forum_data['forum_link'], false, true);
+		return;
 	}
 
 	// Forum Rules

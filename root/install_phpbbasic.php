@@ -53,6 +53,7 @@ $versions = array(
 		),
 	),
 	'0.0.2' => array(),
+	'0.0.3' => array(),
 );
 
 include($phpbb_root_path . 'umil/umil_auto.' . $phpEx);

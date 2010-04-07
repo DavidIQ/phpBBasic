@@ -48,6 +48,7 @@
 				<rev-version>0.0.3</rev-version>
 				<changelog lang="en-gb">
 					<change>Adjusted breadcrumbs and removed unneeded code.</change>
+					<change>Added a hook to reduce number of edits a bit more.</change>
 				</changelog>
 			</entry>
 		</history>
@@ -61,15 +62,17 @@
 
 		<copy>
 			<file from="root/includes/functions_phpbbasic.php" to="includes/functions_phpbbasic.php" />
+			<file from="root/includes/hooks/hook_phpbbasic.php" to="includes/hooks/hook_phpbbasic.php" />
 			<file from="root/install_phpbbasic.php" to="install_phpbbasic.php" />
 			<file from="root/umil/*.*" to="umil/*.*" />
 		</copy>
 
 		<open src="includes/functions_display.php">
 			<edit>
-				<find><![CDATA[		'U_VIEW_FORUM'	=> append_sid("{$phpbb_root_path}viewforum.$phpEx", 'f=' . $forum_data['forum_id']
+				<find><![CDATA[		'U_VIEW_FORUM'	=> append_sid("{$phpbb_root_path}viewforum.$phpEx", 'f=' . $forum_data['forum_id']))
+	);
 	}]]></find>
-				<action type="after-add"><![CDATA[	else
+				<action type="after-add"><![CDATA[	else if ((int) $forum_data['forum_id'] != (int) $config['phpbbasic_forumid'])
 	{
 		$template->assign_block_vars('navlinks', array(
 			'S_IS_CAT'		=> false,
@@ -83,6 +86,20 @@
 			</edit>
 		</open>
 
+		<open src="posting.php">
+			<edit>
+				<find><![CDATA[				if (isset($config['phpbbasic_forumid']) && $config['phpbbasic_forumid'])
+				{
+					redirect($redirect_url);
+				}
+				else
+				{
+					meta_refresh(3, $redirect_url);
+				}]]></find>
+				<action type="replace-with"><![CDATA[				meta_refresh(3, $redirect_url);]]></action>
+			</edit>
+		</open>
+
 		<open src="viewforum.php">
 			<edit>
 				<find><![CDATA[$auth->acl($user->data);
@@ -93,16 +110,23 @@ if (isset($config['phpbbasic_forumid']) && $config['phpbbasic_forumid'])
 }]]></find>
 				<action type="replace-with"><![CDATA[$auth->acl($user->data);]]></action>
 			</edit>
-			<edit>
-				<find><![CDATA[$start		= request_var('start', 0);]]></find>
-				<action type="after-add"><![CDATA[if (isset($config['phpbbasic_forumid']) && $config['phpbbasic_forumid'])
-{
-	redirect(append_sid("{$phpbb_root_path}index.$phpEx", (($forum_id) ? "f=$forum_id" : "")), false, false);
-}]]></action>
-			</edit>
 		</open>
 
 		<open src="viewtopic.php">
+			<edit>
+				<find><![CDATA[if (!isset($config['phpbbasic_forumid']) || !$config['phpbbasic_forumid'])
+{
+	$topic_mod .= ($auth->acl_get('m_move', $forum_id) && $topic_data['topic_status'] != ITEM_MOVED) ? '<option value="move">' . $user->lang['MOVE_TOPIC'] . '</option>' : '';
+}]]></find>
+				<action type="replace-with"><![CDATA[$topic_mod .= ($auth->acl_get('m_move', $forum_id) && $topic_data['topic_status'] != ITEM_MOVED) ? '<option value="move">' . $user->lang['MOVE_TOPIC'] . '</option>' : '';]]></action>
+			</edit>
+			<edit>
+				<find><![CDATA[if (!isset($config['phpbbasic_forumid']) || !$config['phpbbasic_forumid'])
+{
+	$topic_mod .= ($auth->acl_get('m_move', $forum_id)) ? '<option value="fork">' . $user->lang['FORK_TOPIC'] . '</option>' : '';
+}]]></find>
+				<action type="replace-with"><![CDATA[$topic_mod .= ($auth->acl_get('m_move', $forum_id)) ? '<option value="fork">' . $user->lang['FORK_TOPIC'] . '</option>' : '';]]></action>
+			</edit>
 			<edit>
 				<find><![CDATA[phpbbasic_update_forum_row_data($topic_data, (isset($config['phpbbasic_forumid']) && $config['phpbbasic_forumid']));
 $forum_id = (int) $topic_data['forum_id'];]]></find>

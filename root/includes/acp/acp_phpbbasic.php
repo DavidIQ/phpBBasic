@@ -36,7 +36,7 @@ class acp_phpbbasic
 		add_form_key($form_name);
 
 		$submit = (isset($_POST['submit'])) ? true : false;
-		$phpbbasic_enable = request_var('phpbbasic_enable', (isset($config['phpbbasic_forumid']) && $config['phpbbasic_forumid'] > 0));
+		$phpbbasic_enable = request_var('phpbbasic_enable', (isset($config['phpbbasic_forumid']) && $config['phpbbasic_forumid']));
 		$single_forum = request_var('phpbbasic_single_forum', false);
 		$errors = $forum_data = array();
 
