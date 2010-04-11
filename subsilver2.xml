@@ -59,7 +59,7 @@
 
 	<action-group>
 
-		<open src="styles/prosilver/template/index_body.html">
+		<open src="styles/subsilver2/template/index_body.html">
 			<edit>
 				<find><![CDATA[<!-- INCLUDE forumlist_body.html -->]]></find>
 				<action type="replace-with"><![CDATA[<!-- IF S_PHPBBASIC_ENABLED -->
@@ -70,7 +70,7 @@
 			</edit>
 		</open>
 		
-		<open src="styles/prosilver/template/viewforum_body.html">
+		<open src="styles/subsilver2/template/viewforum_body.html">
 			<edit>
 				<find><![CDATA[<!-- INCLUDE overall_header.html -->]]></find>
 				<action type="before-add"><![CDATA[<!-- IF not S_PHPBBASIC_ENABLED -->]]></action>
