@@ -1128,6 +1128,7 @@ _uid'], $forum_data['forum_rules_bitfield'], $forum_data['forum_rules_options'],
 				if (!$update)
 				{
 					$forum_data = array(
+						'forum_id'				=> 0,
 						'parent_id'				=> $acp_forums_class->parent_id,
 						'forum_type'			=> FORUM_POST,
 						'forum_status'			=> ITEM_UNLOCKED,
@@ -1500,6 +1501,7 @@ _uid'], $forum_data['forum_rules_bitfield'], $forum_data['forum_rules_options'],
 		'NAVIGATION'	=> $navigation,
 		'U_ACTION'		=> $acp_forums_class->u_action . '&amp;parent_id=' . $acp_forums_class->parent_id,
 		'S_PHPBBASIC_FORUMID' => $phpbbasic_forumid,
+		'S_PARENT_ID'		=> request_var('parent_id', 0),
 		'U_PROGRESS_BAR'	=> $acp_forums_class->u_action . '&amp;action=progress_bar',
 		'UA_PROGRESS_BAR'	=> addslashes($acp_forums_class->u_action . '&amp;action=progress_bar'),
 	));

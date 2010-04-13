@@ -4,7 +4,8 @@
 	onload = function()
 	{
 		<!-- IF not S_PHPBBASIC_ENABLE -->
-		dE('copy_from', -1);
+		dE('use_existing', -1);
+		dE('use_existing_forum_select', -1);
 		<!-- ENDIF -->
 	}
 // ]]>
@@ -27,16 +28,33 @@
 <fieldset>
 	<legend>{L_PHPBBASIC_OPTIONS}</legend>
 	<dl>
+		<dt><label>{L_PHPBBASIC_VERSION}:</label></dt>
+		<dd><label>{PHPBBASIC_VERSION}</label></dd>
+	</dl>
+	<dl>
 		<dt><label for="phpbbasic_enable">{L_ENABLE_PHPBBASIC}:</label></dt>
-		<dd><label><input type="radio" name="phpbbasic_enable" value="1"<!-- IF S_PHPBBASIC_ENABLE -->  checked="checked"<!-- ELSE --> onclick="dE('copy_from', 1);"<!-- ENDIF --> class="radio" /> {L_YES}</label>
-		<label><input type="radio" name="phpbbasic_enable" id="phpbbasic_enable" value="0"<!-- IF not S_PHPBBASIC_ENABLE --> checked="checked" onclick="dE('copy_from', -1);"<!-- ENDIF --> class="radio" /> {L_NO}</label></dd>
+		<dd><label><input type="radio" name="phpbbasic_enable" value="1"<!-- IF S_PHPBBASIC_ENABLE -->  checked="checked"<!-- ELSE --> onclick="dE('use_existing', 1);"<!-- ENDIF --> class="radio" /> {L_YES}</label>
+		<label><input type="radio" name="phpbbasic_enable" id="phpbbasic_enable" value="0"<!-- IF not S_PHPBBASIC_ENABLE --> checked="checked" onclick="dE('use_existing', 0);"<!-- ENDIF --> class="radio" /> {L_NO}</label></dd>
 	</dl>
 	<!-- IF not S_PHPBBASIC_ENABLE -->
-	<div id="copy_from">
+	<div id="use_existing">
 		<dl>
-			<dt><label for="copy_perm_from">{L_COPY_PERMISSIONS_FROM}:</label><br /><span>{L_COPY_PERMISSIONS_FROM_EXPLAIN}</span></dt>
-			<dd><select id="copy_perm_from" name="copy_perm_from">{S_FORUM_OPTIONS}</select></dd>
+			<dt><label for="use_existing_forum">{L_USE_EXISTING_FORUM}:</label><br /><span>{L_USE_EXISTING_FORUM_EXPLAIN}</span></dt>
+			<dd><label><input type="radio" name="use_existing_forum" value="1" onclick="dE('copy_from', 0); dE('use_existing_forum_select', 1);" class="radio" /> {L_YES}</label>
+			<label><input type="radio" name="use_existing_forum" id="use_existing_forum" value="0" checked="checked" onclick="dE('copy_from', 0); dE('use_existing_forum_select', 1);" class="radio" /> {L_NO}</label></dd>
 		</dl>
+		<div id="use_existing_forum_select">
+			<dl>
+				<dt><label for="existing_forum_select">{L_SELECT_EXISTING_FORUM}</label></dt>
+				<dd><select id="existing_forum_select" name="existing_forum_select">{S_FORUM_OPTIONS}</select></dd>
+			</dl>
+		</div>
+		<div id="copy_from">
+			<dl>
+				<dt><label for="copy_perm_from">{L_COPY_PERMISSIONS_FROM}:</label><br /><span>{L_COPY_PERMISSIONS_FROM_EXPLAIN}</span></dt>
+				<dd><select id="copy_perm_from" name="copy_perm_from">{S_FORUM_OPTIONS}</select></dd>
+			</dl>
+		</div>
 	</div>
 	<dl>
 		<dt><label for="phpbbasic_single_forum">{L_PHPBBASIC_SINGLE_FORUM}:</label><br /><span>{L_PHPBBASIC_SINGLE_FORUM_EXPLAIN}</span></dt>

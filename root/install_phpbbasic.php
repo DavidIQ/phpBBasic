@@ -30,7 +30,6 @@ $version_config_name = 'phpbbasic_version';
 $language_file = 'mods/info_acp_phpbbasic';
 
 $versions = array(
-	// Version 0.0.1
 	'0.0.1'	=> array(
 		'config_add' => array(
 			array('phpbbasic_forumid', 0),
@@ -54,6 +53,7 @@ $versions = array(
 	),
 	'0.0.2' => array(),
 	'0.0.3' => array(),
+	'1.0.0-RC1' => array(),
 );
 
 include($phpbb_root_path . 'umil/umil_auto.' . $phpEx);
