@@ -52,7 +52,7 @@ function hook_validate_forum()
 		foreach ($qs as $qs_key)
 		{
 			$qs_key = explode('=', $qs_key);
-			if ($qs_key[1] == '' || $qs_key[1] == 'sid' || ($qs_key[0] == 'f' && !($forum_id > 0)))
+			if ($qs_key[1] == '' || $qs_key[0] == 'sid' || ($qs_key[0] == 'f' && !($forum_id > 0)))
 			{
 				continue;
 			}
