@@ -30,7 +30,7 @@ function hook_validate_forum()
 	//Need to make sure this is a valid forum ID
 	if ($forum_id > 0 && $forum_id != (int) $config['phpbbasic_forumid'])
 	{
-		$sql = 'SELECT * FROM ' . FORUMS_TABLE . "
+		$sql = 'SELECT forum_id FROM ' . FORUMS_TABLE . "
 				WHERE forum_id = $forum_id
 				AND parent_id = {$config['phpbbasic_forumid']}";
 		$result = $db->sql_query_limit($sql, 1);
@@ -44,6 +44,27 @@ function hook_validate_forum()
 	//Do the redirect if this is viewforum or if forum ID is invalid
 	if ($user->page['page_name'] == "viewforum.$phpEx" || $forum_id === false)
 	{
+		//Need the querystring
+		$qs = str_replace('&amp;', '&', $user->page['query_string']);
+		$qs = explode('&', $qs);
+		$query_string = '';
+
+		foreach ($qs as $qs_key)
+		{
+			$qs_key = explode('=', $qs_key);
+			if ($qs_key[1] == '' || $qs_key[1] == 'sid' || ($qs_key[0] == 'f' && !($forum_id > 0)))
+			{
+				continue;
+			}
+
+			//Override the forum ID if present
+			if ($qs_key[0] == 'f')
+			{
+				$qs_key[1] = $forum_id;
+			}
+			$query_string .= (($query_string != '') ? '&amp;' : '') . $qs_key[0] . '=' . $qs_key[1];
+		}
+		
 		if ($forum_id > 0)
 		{
 			redirect(append_sid("{$phpbb_root_path}index.$phpEx", "f=$forum_id"));
