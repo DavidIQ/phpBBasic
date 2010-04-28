@@ -65,14 +65,7 @@ function hook_validate_forum()
 			$query_string .= (($query_string != '') ? '&amp;' : '') . $qs_key[0] . '=' . $qs_key[1];
 		}
 		
-		if ($forum_id > 0)
-		{
-			redirect(append_sid("{$phpbb_root_path}index.$phpEx", "f=$forum_id"));
-		}
-		else
-		{
-			redirect(append_sid("{$phpbb_root_path}index.$phpEx"));
-		}
+		redirect(append_sid("{$phpbb_root_path}index.$phpEx", $query_string));
 	}
 }
 
