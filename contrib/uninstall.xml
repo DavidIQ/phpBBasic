@@ -20,7 +20,7 @@
 			</author>
 		</author-group>
 		
-		<mod-version>1.0.0-RC1</mod-version>
+		<mod-version>1.0.0</mod-version>
 		
 		<installation>
 			<level>intermediate</level>
@@ -57,6 +57,14 @@
 					<change>Corrected left and right forum ID assignments for use when activating/deactivating the MOD.  This was causing a whole slew of other issues.</change>
 					<change>Added ability to use an existing forum when enabling MOD.</change>
 					<change>Retain all forums on enabling of MOD.</change>
+				</changelog>
+			</entry>
+			<entry>
+				<date>2010-05-03</date>
+				<rev-version>1.0.0</rev-version>
+				<changelog lang="en-gb">
+					<change>Take into consideration the anchor link in the URL in the hook.</change>
+					<change>Stable version for MODDB submission.</change>
 				</changelog>
 			</entry>
 		</history>

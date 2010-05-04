@@ -20,7 +20,7 @@
 			</author>
 		</author-group>
 		
-		<mod-version>1.0.0-RC1</mod-version>
+		<mod-version>1.0.0</mod-version>
 		
 		<installation>
 			<level>intermediate</level>
@@ -61,6 +61,14 @@
 					<change>Retain all forums on enabling of MOD.</change>
 				</changelog>
 			</entry>
+			<entry>
+				<date>2010-05-03</date>
+				<rev-version>1.0.0</rev-version>
+				<changelog lang="en-gb">
+					<change>Take into consideration the anchor link in the URL in the hook.</change>
+					<change>Stable version for MODDB submission.</change>
+				</changelog>
+			</entry>
 		</history>
 		
 		<link-group>
@@ -68,6 +76,7 @@
 			<link type="contrib" lang="en-gb" href="./contrib/update_0_0_1_to_0_0_2.xml">Update from 0.0.1 to 0.0.2</link>
 			<link type="contrib" lang="en-gb" href="./contrib/update_0_0_2_to_0_0_3.xml">Update from 0.0.2 to 0.0.3</link>
 			<link type="contrib" lang="en-gb" href="./contrib/update_0_0_3_to_1_0_0_RC1.xml">Update from 0.0.3 to 1.0.0-RC1</link>
+			<link type="contrib" lang="en-gb" href="./contrib/update_1_0_0_RC1_to_1_0_0.xml">Update from 1.0.0-RC1 to 1.0.0</link>
 			<link type="uninstall" lang="en-gb" href="./contrib/uninstall.xml">Uninstall</link>
 		</link-group>
 	</header>

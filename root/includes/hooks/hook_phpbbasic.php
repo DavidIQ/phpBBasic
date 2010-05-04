@@ -62,6 +62,11 @@ function hook_validate_forum()
 			{
 				$qs_key[1] = $forum_id;
 			}
+			//For posts there's also an anchor in the URL. Let's make sure we preserve it
+			if ($qs_key[0] == 'p')
+			{
+				$qs_key[1] = $qs_key[1] . '#p' . $qs_key[1];
+			}
 			$query_string .= (($query_string != '') ? '&amp;' : '') . $qs_key[0] . '=' . $qs_key[1];
 		}
 		
