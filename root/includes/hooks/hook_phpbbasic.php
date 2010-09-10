@@ -137,18 +137,3 @@ if (!defined('ADMIN_START'))
 {
 	$phpbb_hook->register(array('template', 'display'), 'hook_disable_delayed_redirects');
 }
-
-/*
-* Remove phpbbasic's forum id from URL if it's there.
-* by: Sam-T
-*/
-function nofeq(&$hook, $url, $params = false, $is_amp = true, $session_id = false)
-{
-	$result = $hook->previous_hook_result('append_sid');
-	
-	global $config;
-	$find = 'f=' . $config['phpbbasic_forumid'] . '&amp;';
-	return str_replace($find, '', $result);
-}
-
-$phpbb_hook->register('append_sid', 'nofeq');
