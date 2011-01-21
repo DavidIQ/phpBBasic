@@ -62,14 +62,10 @@ function hook_validate_forum()
 			{
 				$qs_key[1] = $forum_id;
 			}
-			//For posts there's also an anchor in the URL. Let's make sure we preserve it
-			if ($qs_key[0] == 'p')
-			{
-				$qs_key[1] = $qs_key[1] . '#p' . $qs_key[1];
-			}
+
 			$query_string .= (($query_string != '') ? '&amp;' : '') . $qs_key[0] . '=' . $qs_key[1];
 		}
-		
+
 		redirect(append_sid("{$phpbb_root_path}index.$phpEx", $query_string));
 	}
 }
@@ -124,6 +120,21 @@ function hook_disable_delayed_redirects(&$hook)
 		// to be broken.
 		if (generate_board_url() . '/' . $user->page['page'] !== $url)
 		{
+			if (!strpos($url, '#p'))
+			{
+				$qs = explode('&', $url);
+
+				foreach ($qs as $qs_key)
+				{
+					//For posts there's also an anchor in the URL. Let's make sure we preserve it
+					if ($qs_key[0] == 'p')
+					{
+						$url .= '#p' . $qs_key[1];
+						break;
+					}
+				}
+			}
+
 			redirect($url);
 			exit; // Implicit
 		}
