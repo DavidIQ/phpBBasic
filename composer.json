@@ -1,0 +1,35 @@
+{
+	"name": "davidiq/phpbbasic",
+	"type": "phpbb-extension",
+	"description": "Simplifies phpBB to a single forum where all posts are shown on the main forum page.",
+	"homepage": "https://www.phpbb.com/customise/db/extension/phpbbasic/",
+	"version": "2.0.0-dev",
+	"keywords": ["phpbb", "extension", "basic", "singleforum"],
+	"license": "GPL-2.0",
+	"authors": [
+		{
+			"name": "David Colón",
+			"email": "phpbb@davidiq.com",
+			"homepage": "http://www.davidiq.com",
+			"role": "Developer"
+		}
+	],
+	"require": {
+		"php": ">=5.3.3",
+		"composer/installers": "~1.0"
+	},
+	"require-dev": {
+		"phpbb/epv": "dev-ascraeus"
+	},
+	"extra": {
+		"display-name": "phpBBasic",
+		"soft-require": {
+			"phpbb/phpbb": ">=3.1.3,<3.2.*@dev"
+		},
+		"version-check": {
+			"host": "www.phpbb.com",
+			"directory": "/customise/db/extension/phpbbasic",
+			"filename": "version_check"
+		}
+	}
+}
