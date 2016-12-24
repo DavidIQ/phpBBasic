@@ -11,7 +11,7 @@ namespace davidiq\phpbbasic\migrations\v20x;
 /**
 * Migration stage 1: Initial data changes to the database
 */
-class initial_data extends \phpbb\db\migration\migration
+class m1_initial_data extends \phpbb\db\migration\migration
 {
 	/**
 	* Add phpBBasic data to the database.

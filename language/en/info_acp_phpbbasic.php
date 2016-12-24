@@ -40,8 +40,4 @@ $lang = array_merge($lang, array(
 	'LOG_PHPBBASIC_ENABLED'		=> '<strong>Enabled phpBBasic</strong>',
 ));
 
-$lang = array_merge($lang, array(
-	'acl_a_phpbbasic'	=> array('lang' => 'Can configure phpBBasic', 'cat' => 'settings')
-));
-
 ?>

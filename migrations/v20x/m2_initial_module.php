@@ -11,7 +11,7 @@ namespace davidiq\phpbbasic\migrations\v20x;
 /**
 * Migration stage 3: Initial module
 */
-class initial_module extends \phpbb\db\migration\migration
+class m2_initial_module extends \phpbb\db\migration\migration
 {
 	/**
 	* Add or update data in the database
