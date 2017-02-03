@@ -103,6 +103,7 @@ class listener implements EventSubscriberInterface
             'core.index_modify_page_title'      => 'display_single_forum',
             'core.display_forums_modify_sql'    => 'display_forums_modify_sql',
             'core.generate_forum_nav'           => 'generate_forum_nav',
+			'core.display_forums_modify_row'	=> 'display_forums_modify_row',
 		);
 	}
 
@@ -250,11 +251,7 @@ class listener implements EventSubscriberInterface
         // Do we have subforums?
         $active_forum_ary = $moderators = array();
 
-        if ($forum_data['left_id'] != $forum_data['right_id'] - 1)
-        {
-            list($active_forum_ary, $moderators) = display_forums($forum_data, $this->config['load_moderators'], $this->config['load_moderators']);
-        }
-        else
+        if ($forum_data['left_id'] == $forum_data['right_id'] - 1)
         {
             $this->template->assign_var('S_HAS_SUBFORUM', false);
             if ($this->config['load_moderators'])
@@ -1123,12 +1120,12 @@ class listener implements EventSubscriberInterface
             return;
         }
         $sql_ary = $event['sql_ary'];
-        $sql_ary['WHERE'] = 'f.parent_id = ' . (int)$this->phpbbasic_forumid;
+        $sql_ary['WHERE'] = (empty($sql_ary['WHERE']) ? '' : $sql_ary['WHERE'] . ' AND ') . 'f.parent_id = ' . (int)$this->phpbbasic_forumid;
         $event['sql_ary'] = $sql_ary;
     }
 
     /**
-     * Looks for and removes the breadcrumb for the phpBBasic forum ID
+     * Looks for the breadcrumb for the phpBBasic forum ID. Also replaces viewforum with index.
      *
      * @param object $event The event object
      * @return null
@@ -1142,14 +1139,28 @@ class listener implements EventSubscriberInterface
         }
 
         $navlinks = $event['navlinks'];
-        $navlinks['U_VIEW_FORUM'] = str_replace($navlinks['U_VIEW_FORUM'], "viewtopic.{$this->php_ext}", "index.{$this->php_ext}");
+        $navlinks['U_VIEW_FORUM'] = str_replace("viewforum.{$this->php_ext}", "index.{$this->php_ext}", $navlinks['U_VIEW_FORUM']);
+        $navlinks['PHPBBASIC_FORUM_BREADCRUMB'] = $navlinks['FORUM_ID'] == $this->phpbbasic_forumid;
         $event['navlinks'] = $navlinks;
         $navlinks_parents = $event['navlinks_parents'];
         for ($i = 0; $i < count($navlinks_parents); $i++)
         {
-            $navlinks_parents[$i]['U_VIEW_FORUM'] = str_replace($navlinks_parents[$i]['U_VIEW_FORUM'], "viewtopic.{$this->php_ext}", "index.{$this->php_ext}");
+            $navlinks_parents[$i]['U_VIEW_FORUM'] = str_replace("viewforum.{$this->php_ext}", "index.{$this->php_ext}", $navlinks_parents[$i]['U_VIEW_FORUM']);
+			$navlinks_parents[$i]['PHPBBASIC_FORUM_BREADCRUMB'] = $navlinks_parents[$i]['FORUM_ID'] == $this->phpbbasic_forumid;
         }
 
         $event['navlinks_parents'] = $navlinks_parents;
     }
+
+	/**
+	 * Sets branch_root_id to the phpBBasic forum ID
+	 *
+	 * @param object $event The event object
+	 * @return null
+	 * @access public
+	 */
+    public function display_forums_modify_row($event)
+	{
+		$event['branch_root_id'] = $this->phpbbasic_forumid;
+	}
 }
