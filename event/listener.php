@@ -299,7 +299,7 @@ class listener implements EventSubscriberInterface
             {
                 markread('topics', array($forum_id), false, $this->request->variable('mark_time', 0));
             }
-            $redirect_url = append_sid("{$this->phpbb_root_path}index.$this->phpEx", 'f=' . $forum_id);
+            $redirect_url = append_sid("{$this->phpbb_root_path}index.$this->php_ext", 'f=' . $forum_id);
             meta_refresh(3, $redirect_url);
 
             if ($this->request->is_ajax())
@@ -494,8 +494,8 @@ class listener implements EventSubscriberInterface
             'S_SELECT_SORT_KEY'		=> $s_sort_key,
             'S_SELECT_SORT_DAYS'	=> $s_limit_days,
             'S_TOPIC_ICONS'			=> ($s_display_active && sizeof($active_forum_ary)) ? max($active_forum_ary['enable_icons']) : (($forum_data['enable_icons']) ? true : false),
-            'U_WATCH_FORUM_LINK'	=> $s_watching_forum['link'],
-            'U_WATCH_FORUM_TOGGLE'	=> $s_watching_forum['link_toggle'],
+            'U_WATCH_FORUM_LINK'	=> str_replace("viewforum.{$this->php_ext}", "index.{$this->php_ext}", $s_watching_forum['link']),
+            'U_WATCH_FORUM_TOGGLE'	=> str_replace("viewforum.{$this->php_ext}", "index.{$this->php_ext}", $s_watching_forum['link_toggle']),
             'S_WATCH_FORUM_TITLE'	=> $s_watching_forum['title'],
             'S_WATCH_FORUM_TOGGLE'	=> $s_watching_forum['title_toggle'],
             'S_WATCHING_FORUM'		=> $s_watching_forum['is_watching'],
