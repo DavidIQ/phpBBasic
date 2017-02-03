@@ -99,11 +99,13 @@ class listener implements EventSubscriberInterface
 	static public function getSubscribedEvents()
 	{
 		return array(
-			'core.session_ip_after'	            => 'disable_viewforum',
-            'core.index_modify_page_title'      => 'display_single_forum',
-            'core.display_forums_modify_sql'    => 'display_forums_modify_sql',
-            'core.generate_forum_nav'           => 'generate_forum_nav',
-			'core.display_forums_modify_row'	=> 'display_forums_modify_row',
+			'core.session_ip_after'	            				=> 'disable_viewforum',
+            'core.index_modify_page_title'      				=> 'display_single_forum',
+            'core.display_forums_modify_sql'    				=> 'display_forums_modify_sql',
+            'core.generate_forum_nav'           				=> 'generate_forum_nav',
+			'core.display_forums_modify_row'					=> 'display_forums_modify_row',
+			'core.display_forums_modify_category_template_vars'	=> 'change_viewforum_to_index',
+			'core.display_forums_modify_template_vars'			=> 'change_viewforum_to_index',
 		);
 	}
 
@@ -491,8 +493,8 @@ class listener implements EventSubscriberInterface
             'S_SELECT_SORT_KEY'		=> $s_sort_key,
             'S_SELECT_SORT_DAYS'	=> $s_limit_days,
             'S_TOPIC_ICONS'			=> ($s_display_active && sizeof($active_forum_ary)) ? max($active_forum_ary['enable_icons']) : (($forum_data['enable_icons']) ? true : false),
-            'U_WATCH_FORUM_LINK'	=> str_replace("viewforum.{$this->php_ext}", "index.{$this->php_ext}", $s_watching_forum['link']),
-            'U_WATCH_FORUM_TOGGLE'	=> str_replace("viewforum.{$this->php_ext}", "index.{$this->php_ext}", $s_watching_forum['link_toggle']),
+            'U_WATCH_FORUM_LINK'	=> $this->viewforum_swap($s_watching_forum['link']),
+            'U_WATCH_FORUM_TOGGLE'	=> $this->viewforum_swap($s_watching_forum['link_toggle']),
             'S_WATCH_FORUM_TITLE'	=> $s_watching_forum['title'],
             'S_WATCH_FORUM_TOGGLE'	=> $s_watching_forum['title_toggle'],
             'S_WATCHING_FORUM'		=> $s_watching_forum['is_watching'],
@@ -1139,13 +1141,13 @@ class listener implements EventSubscriberInterface
         }
 
         $navlinks = $event['navlinks'];
-        $navlinks['U_VIEW_FORUM'] = str_replace("viewforum.{$this->php_ext}", "index.{$this->php_ext}", $navlinks['U_VIEW_FORUM']);
+        $navlinks['U_VIEW_FORUM'] = $this->viewforum_swap($navlinks['U_VIEW_FORUM']);
         $navlinks['PHPBBASIC_FORUM_BREADCRUMB'] = $navlinks['FORUM_ID'] == $this->phpbbasic_forumid;
         $event['navlinks'] = $navlinks;
         $navlinks_parents = $event['navlinks_parents'];
         for ($i = 0; $i < count($navlinks_parents); $i++)
         {
-            $navlinks_parents[$i]['U_VIEW_FORUM'] = str_replace("viewforum.{$this->php_ext}", "index.{$this->php_ext}", $navlinks_parents[$i]['U_VIEW_FORUM']);
+            $navlinks_parents[$i]['U_VIEW_FORUM'] = $this->viewforum_swap($navlinks_parents[$i]['U_VIEW_FORUM']);
 			$navlinks_parents[$i]['PHPBBASIC_FORUM_BREADCRUMB'] = $navlinks_parents[$i]['FORUM_ID'] == $this->phpbbasic_forumid;
         }
 
@@ -1162,5 +1164,53 @@ class listener implements EventSubscriberInterface
     public function display_forums_modify_row($event)
 	{
 		$event['branch_root_id'] = $this->phpbbasic_forumid;
+	}
+
+	/**
+	 * Update any viewforum references to index in the sub-forum generation
+	 *
+	 * @param object $event The event object
+	 * @return null
+	 * @access public
+	 */
+	public function change_viewforum_to_index($event)
+	{
+		$keys = array('cat_row', 'last_catless', 'root_data', 'forum_row', 'subforums_row');
+
+		foreach ($keys as $key)
+		{
+			if (isset($event[$key]))
+			{
+				$event[$key] = $this->check_and_replace_viewforum($event[$key]);
+			}
+		}
+	}
+
+	/**
+	 * Function to replace viewforum with index
+	 *
+	 * @param string $viewforum_ref The viewforum reference to swap
+	 * @return string
+	 * @access private
+	 */
+	private function viewforum_swap($viewforum_ref)
+	{
+		return str_replace("viewforum.{$this->php_ext}", "index.{$this->php_ext}", $viewforum_ref);
+	}
+
+	/**
+	 * Checks for and replaces viewforum references
+	 *
+	 * @param array $viewforum_check The array from the event to check for viewforum references
+	 * @return array
+	 * @access private
+	 */
+	private function check_and_replace_viewforum($viewforum_check)
+	{
+		if (isset($viewforum_check['U_VIEWFORUM']))
+		{
+			$viewforum_check['U_VIEWFORUM'] = $this->viewforum_swap($viewforum_check['U_VIEWFORUM']);
+		}
+		return $viewforum_check;
 	}
 }
