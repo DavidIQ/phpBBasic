@@ -125,7 +125,18 @@ class listener implements EventSubscriberInterface
 
         if ($this->user->page['page_name'] == 'viewforum.' . $this->php_ext)
         {
-            redirect(append_sid("{$this->phpbb_root_path}index.{$this->php_ext}"));
+			$path_helper = $this->phpbb_container->get('path_helper');
+			$url_parts = $path_helper->get_url_parts($this->user->page['page']);
+			$querystring = array();
+			// Looking for the phpBBasic forum ID so we can remove it before redirecting
+			foreach ($url_parts['params'] as $key => $value)
+			{
+				if (($key != 'f'&& !empty($value)) || ($key == 'f' && $value != $this->phpbbasic_forumid))
+				{
+					$querystring = array_merge($querystring, array($key => $value));
+				}
+			}
+			redirect(append_sid("{$this->phpbb_root_path}index.{$this->php_ext}", $querystring));
         }
     }
 
