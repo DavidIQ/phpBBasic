@@ -3,7 +3,7 @@
 	"type": "phpbb-extension",
 	"description": "Simplifies phpBB to a single forum where all posts are shown on the main index page.",
 	"homepage": "https://www.phpbb.com/customise/db/extension/phpbbasic/",
-	"version": "2.0.0-RC1",
+	"version": "2.0.0",
 	"keywords": ["phpbb", "extension", "basic", "singleforum"],
 	"license": "GPL-2.0",
 	"authors": [
