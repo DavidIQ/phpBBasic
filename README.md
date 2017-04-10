@@ -4,7 +4,7 @@
 phpBB Extension to add single forum setup to a phpBB installation, with all topics visible on the forum's index page.
 
 ## Installation
-1. [Download the latest code](https://github.com/DavidIQ/phpBBasic/archive/master.zip).
+1. [Download the latest release](https://github.com/DavidIQ/phpBBasic/releases).
 2. Unzip the downloaded code archive, and change the name of the folder to `phpbbasic`.
 3. In the `ext` directory of your phpBB board, create a new directory named `davidiq` (if it does not already exist).
 4. Copy the `phpbbasic` directory to `phpBB/ext/davidiq/`
