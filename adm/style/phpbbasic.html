@@ -16,13 +16,13 @@
 <fieldset>
 	<legend>{L_PHPBBASIC_OPTIONS}</legend>
 	<dl>
-		<dt><label for="phpbbasic_enable">{L_ENABLE_PHPBBASIC}:</label></dt>
+		<dt><label for="phpbbasic_enable">{L_ENABLE_PHPBBASIC}{L_COLON}</label></dt>
 		<dd><label><input type="radio" name="phpbbasic_enable" value="1"<!-- IF S_PHPBBASIC_ENABLE -->  checked="checked"<!-- ELSE --> onclick="dE('use_existing', 1);"<!-- ENDIF --> class="radio" /> {L_YES}</label>
 		<label><input type="radio" name="phpbbasic_enable" id="phpbbasic_enable" value="0"<!-- IF not S_PHPBBASIC_ENABLE --> checked="checked" onclick="dE('use_existing', 0);"<!-- ENDIF --> class="radio" /> {L_NO}</label></dd>
 	</dl>
 	<!-- IF not S_PHPBBASIC_ENABLE -->
 	<dl>
-		<dt><label for="copy_perm_from">{L_COPY_PERMISSIONS_FROM}:</label><br /><span>{L_COPY_PERMISSIONS_FROM_EXPLAIN}</span></dt>
+		<dt><label for="copy_perm_from">{L_COPY_PERMISSIONS_FROM}{L_COLON}</label><br /><span>{L_COPY_PERMISSIONS_FROM_EXPLAIN}</span></dt>
 		<dd><select id="copy_perm_from" name="copy_perm_from">{S_FORUM_OPTIONS}</select></dd>
 	</dl>
 	<dl>

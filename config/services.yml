@@ -2,16 +2,16 @@ services:
     davidiq.phpbbasic.listener:
         class: davidiq\phpbbasic\event\listener
         arguments:
-            - @config
-            - @request
-            - @service_container
-            - @dbal.conn
-            - @user
-            - @auth
-            - @template
-            - @cache
-            - @dispatcher
-            - %core.root_path%
-            - %core.php_ext%
+            - '@config'
+            - '@request'
+            - '@service_container'
+            - '@dbal.conn'
+            - '@user'
+            - '@auth'
+            - '@template'
+            - '@cache'
+            - '@dispatcher'
+            - '%core.root_path%'
+            - '%core.php_ext%'
         tags:
             - { name: event.listener }

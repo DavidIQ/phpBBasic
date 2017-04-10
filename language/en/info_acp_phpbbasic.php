@@ -40,4 +40,3 @@ $lang = array_merge($lang, array(
 	'LOG_PHPBBASIC_ENABLED'		=> '<strong>Enabled phpBBasic</strong>',
 ));
 
-?>

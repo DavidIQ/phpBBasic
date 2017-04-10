@@ -66,7 +66,6 @@ class phpbbasic_module
 		add_form_key($form_name);
 
 		$phpbbasic_enable = $this->request->variable('phpbbasic_enable', $this->config['phpbbasic_forumid'] > 0);
-		$single_forum = $this->request->variable('phpbbasic_single_forum', false);
 		$errors = $forum_data = array();
 
         if ($this->request->is_set_post('submit'))

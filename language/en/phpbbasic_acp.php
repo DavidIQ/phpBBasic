@@ -32,8 +32,8 @@ if (empty($lang) || !is_array($lang))
 // in a url you again do not need to specify an order e.g., 'Click %sHERE%s' is fine
 
 $lang = array_merge($lang, array(
-	'ACP_PHPBBASIC_CONFIG_EXPLAIN'		=> 'Enabling phpBBasic will create a forum with the title "phpBBasic".  This will retain topic information in a separate forum should the need arise to disable this Extension.',
-	'PHPBBASIC_WARNING'	                => '<strong>WARNING:</strong> all previous forums will be removed and posts moved to "Main Forum". This CANNOT be undone and may take some time to complete if you have many forums.',
+	'ACP_PHPBBASIC_CONFIG_EXPLAIN'		=> 'Enabling phpBBasic will create a forum with the title “phpBBasic”.  This will retain topic information in a separate forum should the need arise to disable this Extension.',
+	'PHPBBASIC_WARNING'	                => '<strong>WARNING:</strong> all previous forums will be removed and posts moved to “Main Forum”. This CANNOT be undone and may take some time to complete if you have many forums.',
 
 	'ENABLE_PHPBBASIC'					=> 'Enable phpBBasic',
 	'PHPBBASIC_ENABLED'					=> 'phpBBasic has been enabled and main forum set/created.',
@@ -46,4 +46,3 @@ $lang = array_merge($lang, array(
 	'COPY_PERMISSIONS_FROM_EXPLAIN' 	=> 'Select a forum to copy permissions from making the main page have the same permissions as the one you select here.',
 ));
 
-?>
