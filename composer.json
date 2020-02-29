@@ -3,9 +3,9 @@
 	"type": "phpbb-extension",
 	"description": "Simplifies phpBB to a single forum where all posts are shown on the main index page.",
 	"homepage": "https://www.phpbb.com/customise/db/extension/phpbbasic/",
-	"version": "2.0.0",
+	"version": "2.1.0",
 	"keywords": ["phpbb", "extension", "basic", "singleforum"],
-	"license": "GPL-2.0",
+	"license": "GPL-2.0-only",
 	"authors": [
 		{
 			"name": "David Colón",
@@ -15,7 +15,7 @@
 		}
 	],
 	"require": {
-		"php": ">=5.4",
+		"php": ">=7.0",
 		"composer/installers": "~1.0"
 	},
 	"require-dev": {
@@ -24,7 +24,7 @@
 	"extra": {
 		"display-name": "phpBBasic",
 		"soft-require": {
-			"phpbb/phpbb": ">=3.2.0,<3.3"
+			"phpbb/phpbb": ">=3.2.9,<4.0"
 		},
 		"version-check": {
 			"host": "www.phpbb.com",

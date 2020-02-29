@@ -1,10 +1,10 @@
 <?php
 /**
-* phpBBasic extension for the phpBB Forum Software package.
-*
-* @copyright (c) 2015 DavidIQ.com
-* @license GNU General Public License, version 2 (GPL-2.0)
-*/
+ * phpBBasic extension for the phpBB Forum Software package.
+ *
+ * @copyright (c) 2015 DavidIQ.com
+ * @license GNU General Public License, version 2 (GPL-2.0)
+ */
 
 namespace davidiq\phpbbasic\event;
 
@@ -12,160 +12,150 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
-* Event listener
-*/
+ * Event listener
+ */
 class listener implements EventSubscriberInterface
 {
-	/** @var \phpbb\config\config */
-	protected $config;
+    /** @var \phpbb\config\config */
+    protected $config;
 
-	/** @var \phpbb\user */
-	protected $user;
+    /** @var \phpbb\user */
+    protected $user;
 
-	/** @var \phpbb\auth\auth */
-	protected $auth;
+    /** @var \phpbb\auth\auth */
+    protected $auth;
 
-	/** @var \phpbb\template\template */
-	protected $template;
+    /** @var \phpbb\template\template */
+    protected $template;
 
-	/** @var string phpEx */
-	protected $php_ext;
+    /** @var string phpEx */
+    protected $php_ext;
 
-	/** @var string phpbb_root_path */
-	protected $phpbb_root_path;
+    /** @var string phpbb_root_path */
+    protected $phpbb_root_path;
 
-	/** @var bool phpbbasic_enabled */
-	protected $phpbbasic_enabled;
+    /** @var bool phpbbasic_enabled */
+    protected $phpbbasic_enabled;
 
-	/** @var int phpbbasic_forumid */
-	protected $phpbbasic_forumid;
+    /** @var int phpbbasic_forumid */
+    protected $phpbbasic_forumid;
 
-	/** @var \phpbb\request\request request */
-	protected $request;
+    /** @var \phpbb\request\request request */
+    protected $request;
 
-	/** @var Containerinterface */
-	protected $phpbb_container;
+    /** @var Containerinterface */
+    protected $phpbb_container;
 
-	/** @var \phpbb\db\driver\driver_interface */
-	protected $db;
+    /** @var \phpbb\db\driver\driver_interface */
+    protected $db;
 
-	/** @var \phpbb\cache\service */
-	protected $cache;
+    /** @var \phpbb\cache\service */
+    protected $cache;
 
-	/** @var \phpbb\event\dispatcher */
-	protected $phpbb_dispatcher;
+    /** @var \phpbb\event\dispatcher */
+    protected $phpbb_dispatcher;
 
-	/**
-	* Constructor
-	*
-	* @param \phpbb\config\config        	$config             Config object
-    * @param \phpbb\request\request         $request            Request object
-    * @param Container                      $phpbb_container    Interface container
-    * @param \phpbb\db\driver\driver_interface $db             dbal object
-    * @param \phpbb\user                    $user               User session object
-    * @param \phpbb\auth\auth               $auth               Auth provider
-    * @param \phpbb\template\template       $template           Template engine
-    * @param \phpbb\cache\service           $cache              Caching object
-    * @param \phpbb\event\dispatcher        $phpbb_dispatcher   Event dispatcher
-	* @param string							$phpbb_root_path	Current phpBB root path
-	* @param string							$php_ext			phpEx
-	* @return \davidiq\phpbbasic\event\listener
-	* @access public
-	*/
-	public function __construct(\phpbb\config\config $config, \phpbb\request\request $request, ContainerInterface $phpbb_container, \phpbb\db\driver\driver_interface $db, \phpbb\user $user, \phpbb\auth\auth $auth, \phpbb\template\template $template, \phpbb\cache\service $cache, \phpbb\event\dispatcher $phpbb_dispatcher, $phpbb_root_path, $php_ext)
-	{
-		$this->config = $config;
-		$this->request = $request;
-		$this->phpbb_container = $phpbb_container;
-		$this->db = $db;
-		$this->phpbb_root_path = $phpbb_root_path;
-		$this->php_ext = $php_ext;
-		$this->user = $user;
-		$this->auth = $auth;
-		$this->template = $template;
-		$this->cache = $cache;
-		$this->phpbb_dispatcher = $phpbb_dispatcher;
-		$this->phpbbasic_forumid = (int)$this->config['phpbbasic_forumid'];
-		$this->phpbbasic_enabled = $this->phpbbasic_forumid > 0;
-	}
+    /**
+     * Constructor
+     *
+     * @param \phpbb\config\config $config Config object
+     * @param \phpbb\request\request $request Request object
+     * @param ContainerInterface $phpbb_container Interface container
+     * @param \phpbb\db\driver\driver_interface $db dbal object
+     * @param \phpbb\user $user User session object
+     * @param \phpbb\auth\auth $auth Auth provider
+     * @param \phpbb\template\template $template Template engine
+     * @param \phpbb\cache\service $cache Caching object
+     * @param \phpbb\event\dispatcher $phpbb_dispatcher Event dispatcher
+     * @param string $phpbb_root_path Current phpBB root path
+     * @param string $php_ext phpEx
+     */
+    public function __construct(\phpbb\config\config $config, \phpbb\request\request $request, ContainerInterface $phpbb_container, \phpbb\db\driver\driver_interface $db, \phpbb\user $user, \phpbb\auth\auth $auth, \phpbb\template\template $template, \phpbb\cache\service $cache, \phpbb\event\dispatcher $phpbb_dispatcher, $phpbb_root_path, $php_ext)
+    {
+        $this->config = $config;
+        $this->request = $request;
+        $this->phpbb_container = $phpbb_container;
+        $this->db = $db;
+        $this->phpbb_root_path = $phpbb_root_path;
+        $this->php_ext = $php_ext;
+        $this->user = $user;
+        $this->auth = $auth;
+        $this->template = $template;
+        $this->cache = $cache;
+        $this->phpbb_dispatcher = $phpbb_dispatcher;
+        $this->phpbbasic_forumid = (int)$this->config['phpbbasic_forumid'];
+        $this->phpbbasic_enabled = $this->phpbbasic_forumid > 0;
+    }
 
-	/**
-	* Assign functions defined in this class to event listeners in the core
-	*
-	* @return array
-	* @static
-	* @access public
-	*/
-	static public function getSubscribedEvents()
-	{
-		return array(
-			'core.session_ip_after'	            				=> 'disable_viewforum',
-            'core.index_modify_page_title'      				=> 'display_single_forum',
-            'core.display_forums_modify_sql'    				=> 'display_forums_modify_sql',
-            'core.generate_forum_nav'           				=> 'generate_forum_nav',
-			'core.display_forums_modify_row'					=> 'display_forums_modify_row',
-			'core.display_forums_modify_category_template_vars'	=> 'change_viewforum_to_index',
-			'core.display_forums_modify_template_vars'			=> 'change_viewforum_to_index',
-		);
-	}
+    /**
+     * Assign functions defined in this class to event listeners in the core
+     *
+     * @return array
+     */
+    static public function getSubscribedEvents()
+    {
+        return [
+            'core.session_ip_after'                             => 'disable_viewforum',
+            'core.index_modify_page_title'                      => 'display_single_forum',
+            'core.display_forums_modify_sql'                    => 'display_forums_modify_sql',
+            'core.generate_forum_nav'                           => 'generate_forum_nav',
+            'core.display_forums_modify_row'                    => 'display_forums_modify_row',
+            'core.display_forums_modify_category_template_vars' => 'change_viewforum_to_index',
+            'core.display_forums_modify_template_vars'          => 'change_viewforum_to_index',
+        ];
+    }
 
     /**
      * Determines if user needs to be redirected to the index page if user gets to viewforum.
      *
      * @param object $event The event object
-     * @return null
-     * @access public
      */
-	public function disable_viewforum($event)
+    public function disable_viewforum($event)
+    {
+        if ($this->phpbbasic_enabled)
+        {
+            if ($this->user->page['page_name'] == 'viewforum.' . $this->php_ext)
+            {
+                $path_helper = $this->phpbb_container->get('path_helper');
+                $url_parts = $path_helper->get_url_parts($this->user->page['page']);
+                $querystring = array();
+                // Looking for the phpBBasic forum ID so we can remove it before redirecting
+                foreach ($url_parts['params'] as $key => $value)
+                {
+                    if (($key != 'f' && !empty($value)) || ($key == 'f' && $value != $this->phpbbasic_forumid))
+                    {
+                        $querystring = array_merge($querystring, [$key => $value]);
+                    }
+                }
+                redirect(append_sid("{$this->phpbb_root_path}index.{$this->php_ext}", $querystring));
+            }
+        }
+    }
+
+    /**
+     * Displays a single forum's topics on the index page as configured with phpBBasic
+     *
+     * @param object $event The event object
+     */
+    public function display_single_forum($event)
     {
         if (!$this->phpbbasic_enabled)
         {
             return;
         }
 
-        if ($this->user->page['page_name'] == 'viewforum.' . $this->php_ext)
-        {
-			$path_helper = $this->phpbb_container->get('path_helper');
-			$url_parts = $path_helper->get_url_parts($this->user->page['page']);
-			$querystring = array();
-			// Looking for the phpBBasic forum ID so we can remove it before redirecting
-			foreach ($url_parts['params'] as $key => $value)
-			{
-				if (($key != 'f'&& !empty($value)) || ($key == 'f' && $value != $this->phpbbasic_forumid))
-				{
-					$querystring = array_merge($querystring, array($key => $value));
-				}
-			}
-			redirect(append_sid("{$this->phpbb_root_path}index.{$this->php_ext}", $querystring));
-        }
-    }
-
-	/**
-	* Displays a single forum's topics on the index page as configured with phpBBasic
-	*
-	* @param object $event The event object
-	* @return null
-	* @access public
-	*/
-	public function display_single_forum($event)
-	{
-	    if (!$this->phpbbasic_enabled)
-        {
-            return;
-        }
-
         // Start initial var setup
-        $forum_id	= $this->request->variable('f', $this->phpbbasic_forumid);
-        $mark_read	= $this->request->variable('mark', '');
-        $start		= $this->request->variable('start', 0);
+        $forum_id = $this->request->variable('f', $this->phpbbasic_forumid);
+        $mark_read = $this->request->variable('mark', '');
+        $start = $this->request->variable('start', 0);
 
-        $default_sort_days	= (!empty($this->user->data['user_topic_show_days'])) ? $this->user->data['user_topic_show_days'] : 0;
-        $default_sort_key	= (!empty($this->user->data['user_topic_sortby_type'])) ? $this->user->data['user_topic_sortby_type'] : 't';
-        $default_sort_dir	= (!empty($this->user->data['user_topic_sortby_dir'])) ? $this->user->data['user_topic_sortby_dir'] : 'd';
+        $default_sort_days = (!empty($this->user->data['user_topic_show_days'])) ? $this->user->data['user_topic_show_days'] : 0;
+        $default_sort_key = (!empty($this->user->data['user_topic_sortby_type'])) ? $this->user->data['user_topic_sortby_type'] : 't';
+        $default_sort_dir = (!empty($this->user->data['user_topic_sortby_dir'])) ? $this->user->data['user_topic_sortby_dir'] : 'd';
 
-        $sort_days	= $this->request->variable('st', $default_sort_days);
-        $sort_key	= $this->request->variable('sk', $default_sort_key);
-        $sort_dir	= $this->request->variable('sd', $default_sort_dir);
+        $sort_days = $this->request->variable('st', $default_sort_days);
+        $sort_key = $this->request->variable('sk', $default_sort_key);
+        $sort_dir = $this->request->variable('sd', $default_sort_dir);
 
         /* @var $pagination \phpbb\pagination */
         $pagination = $this->phpbb_container->get('pagination');
@@ -295,7 +285,7 @@ class listener implements EventSubscriberInterface
         if (!$this->auth->acl_get('f_read', $forum_id))
         {
             $this->template->assign_vars(array(
-                'S_NO_READ_ACCESS'		=> true,
+                'S_NO_READ_ACCESS' => true,
             ));
 
             page_footer();
@@ -316,11 +306,11 @@ class listener implements EventSubscriberInterface
             {
                 // Tell the ajax script what language vars and URL need to be replaced
                 $data = array(
-                    'NO_UNREAD_POSTS'	=> $this->user->lang['NO_UNREAD_POSTS'],
-                    'UNREAD_POSTS'		=> $this->user->lang['UNREAD_POSTS'],
-                    'U_MARK_TOPICS'		=> ($this->user->data['is_registered'] || $this->config['load_anon_lastread']) ? append_sid("{$this->phpbb_root_path}index.{$this->php_ext}", 'hash=' . generate_link_hash('global') . "&f=$forum_id&mark=topics&mark_time=" . time()) : '',
-                    'MESSAGE_TITLE'		=> $this->user->lang['INFORMATION'],
-                    'MESSAGE_TEXT'		=> $this->user->lang['TOPICS_MARKED']
+                    'NO_UNREAD_POSTS' => $this->user->lang['NO_UNREAD_POSTS'],
+                    'UNREAD_POSTS'    => $this->user->lang['UNREAD_POSTS'],
+                    'U_MARK_TOPICS'   => ($this->user->data['is_registered'] || $this->config['load_anon_lastread']) ? append_sid("{$this->phpbb_root_path}index.{$this->php_ext}", 'hash=' . generate_link_hash('global') . "&f=$forum_id&mark=topics&mark_time=" . time()) : '',
+                    'MESSAGE_TITLE'   => $this->user->lang['INFORMATION'],
+                    'MESSAGE_TEXT'    => $this->user->lang['TOPICS_MARKED']
                 );
                 $json_response = new \phpbb\json_response();
                 $json_response->send($data);
@@ -348,8 +338,7 @@ class listener implements EventSubscriberInterface
             {
                 $url = $task->get_url();
                 $this->template->assign_var('RUN_CRON_TASK', '<img src="' . $url . '" width="1" height="1" alt="cron" />');
-            }
-            else
+            } else
             {
                 // See if we should prune the shadow topics instead
                 $task = $cron->find_task('cron.task.core.prune_shadow_topics');
@@ -365,11 +354,11 @@ class listener implements EventSubscriberInterface
 
         // Forum rules and subscription info
         $s_watching_forum = array(
-            'link'			=> '',
-            'link_toggle'	=> '',
-            'title'			=> '',
-            'title_toggle'	=> '',
-            'is_watching'	=> false,
+            'link'         => '',
+            'link_toggle'  => '',
+            'title'        => '',
+            'title_toggle' => '',
+            'is_watching'  => false,
         );
 
         if ($this->config['allow_forum_notify'] && $forum_data['forum_type'] == FORUM_POST && ($this->auth->acl_get('f_subscribe', $forum_id) || $this->user->data['user_id'] == ANONYMOUS))
@@ -396,11 +385,11 @@ class listener implements EventSubscriberInterface
             $min_post_time = time() - ($sort_days * 86400);
 
             $sql_array = array(
-                'SELECT'	=> 'COUNT(t.topic_id) AS num_topics',
-                'FROM'		=> array(
-                    TOPICS_TABLE	=> 't',
+                'SELECT' => 'COUNT(t.topic_id) AS num_topics',
+                'FROM'   => array(
+                    TOPICS_TABLE => 't',
                 ),
-                'WHERE'		=> 't.forum_id = ' . $forum_id . '
+                'WHERE'  => 't.forum_id = ' . $forum_id . '
 			AND (t.topic_last_post_time >= ' . $min_post_time . '
 				OR t.topic_type = ' . POST_ANNOUNCE . '
 				OR t.topic_type = ' . POST_GLOBAL . ')
@@ -411,13 +400,13 @@ class listener implements EventSubscriberInterface
              * Modify the sort data SQL query for getting additional fields if needed
              *
              * @event core.viewforum_modify_sort_data_sql
-             * @var int		forum_id		The forum_id whose topics are being listed
-             * @var int		start			Variable containing start for pagination
-             * @var int		sort_days		The oldest topic displayable in elapsed days
-             * @var string	sort_key		The sorting by. It is one of the first character of (in low case):
-             *								Author, Post time, Replies, Subject, Views
-             * @var string	sort_dir		Either "a" for ascending or "d" for descending
-             * @var array	sql_array		The SQL array to get the data of all topics
+             * @var int        forum_id        The forum_id whose topics are being listed
+             * @var int        start            Variable containing start for pagination
+             * @var int        sort_days        The oldest topic displayable in elapsed days
+             * @var string    sort_key        The sorting by. It is one of the first character of (in low case):
+             *                                Author, Post time, Replies, Subject, Views
+             * @var string    sort_dir        Either "a" for ascending or "d" for descending
+             * @var array    sql_array        The SQL array to get the data of all topics
              * @since 3.1.9-RC1
              */
             $vars = array(
@@ -431,7 +420,7 @@ class listener implements EventSubscriberInterface
             extract($this->phpbb_dispatcher->trigger_event('core.viewforum_modify_sort_data_sql', compact($vars)));
 
             $result = $this->db->sql_query($this->db->sql_build_query('SELECT', $sql_array));
-            $topics_count = (int) $this->db->sql_fetchfield('num_topics');
+            $topics_count = (int)$this->db->sql_fetchfield('num_topics');
             $this->db->sql_freeresult($result);
 
             if (isset($_POST['sort']))
@@ -442,8 +431,7 @@ class listener implements EventSubscriberInterface
 
             // Make sure we have information about day selection ready
             $this->template->assign_var('S_SORT_DAYS', true);
-        }
-        else
+        } else
         {
             $sql_limit_time = '';
         }
@@ -471,58 +459,58 @@ class listener implements EventSubscriberInterface
         }
 
         $this->template->assign_vars(array(
-            'MODERATORS'	=> (!empty($moderators[$forum_id])) ? implode($this->user->lang['COMMA_SEPARATOR'], $moderators[$forum_id]) : '',
+            'MODERATORS' => (!empty($moderators[$forum_id])) ? implode($this->user->lang['COMMA_SEPARATOR'], $moderators[$forum_id]) : '',
 
-            'POST_IMG'					=> ($forum_data['forum_status'] == ITEM_LOCKED) ? $this->user->img('button_topic_locked', $post_alt) : $this->user->img('button_topic_new', $post_alt),
-            'NEWEST_POST_IMG'			=> $this->user->img('icon_topic_newest', 'VIEW_NEWEST_POST'),
-            'LAST_POST_IMG'				=> $this->user->img('icon_topic_latest', 'VIEW_LATEST_POST'),
-            'FOLDER_IMG'				=> $this->user->img('topic_read', 'NO_UNREAD_POSTS'),
-            'FOLDER_UNREAD_IMG'			=> $this->user->img('topic_unread', 'UNREAD_POSTS'),
-            'FOLDER_HOT_IMG'			=> $this->user->img('topic_read_hot', 'NO_UNREAD_POSTS_HOT'),
-            'FOLDER_HOT_UNREAD_IMG'		=> $this->user->img('topic_unread_hot', 'UNREAD_POSTS_HOT'),
-            'FOLDER_LOCKED_IMG'			=> $this->user->img('topic_read_locked', 'NO_UNREAD_POSTS_LOCKED'),
-            'FOLDER_LOCKED_UNREAD_IMG'	=> $this->user->img('topic_unread_locked', 'UNREAD_POSTS_LOCKED'),
-            'FOLDER_STICKY_IMG'			=> $this->user->img('sticky_read', 'POST_STICKY'),
-            'FOLDER_STICKY_UNREAD_IMG'	=> $this->user->img('sticky_unread', 'POST_STICKY'),
-            'FOLDER_ANNOUNCE_IMG'		=> $this->user->img('announce_read', 'POST_ANNOUNCEMENT'),
-            'FOLDER_ANNOUNCE_UNREAD_IMG'=> $this->user->img('announce_unread', 'POST_ANNOUNCEMENT'),
-            'FOLDER_MOVED_IMG'			=> $this->user->img('topic_moved', 'TOPIC_MOVED'),
-            'REPORTED_IMG'				=> $this->user->img('icon_topic_reported', 'TOPIC_REPORTED'),
-            'UNAPPROVED_IMG'			=> $this->user->img('icon_topic_unapproved', 'TOPIC_UNAPPROVED'),
-            'DELETED_IMG'				=> $this->user->img('icon_topic_deleted', 'TOPIC_DELETED'),
-            'POLL_IMG'					=> $this->user->img('icon_topic_poll', 'TOPIC_POLL'),
-            'GOTO_PAGE_IMG'				=> $this->user->img('icon_post_target', 'GOTO_PAGE'),
+            'POST_IMG'                   => ($forum_data['forum_status'] == ITEM_LOCKED) ? $this->user->img('button_topic_locked', $post_alt) : $this->user->img('button_topic_new', $post_alt),
+            'NEWEST_POST_IMG'            => $this->user->img('icon_topic_newest', 'VIEW_NEWEST_POST'),
+            'LAST_POST_IMG'              => $this->user->img('icon_topic_latest', 'VIEW_LATEST_POST'),
+            'FOLDER_IMG'                 => $this->user->img('topic_read', 'NO_UNREAD_POSTS'),
+            'FOLDER_UNREAD_IMG'          => $this->user->img('topic_unread', 'UNREAD_POSTS'),
+            'FOLDER_HOT_IMG'             => $this->user->img('topic_read_hot', 'NO_UNREAD_POSTS_HOT'),
+            'FOLDER_HOT_UNREAD_IMG'      => $this->user->img('topic_unread_hot', 'UNREAD_POSTS_HOT'),
+            'FOLDER_LOCKED_IMG'          => $this->user->img('topic_read_locked', 'NO_UNREAD_POSTS_LOCKED'),
+            'FOLDER_LOCKED_UNREAD_IMG'   => $this->user->img('topic_unread_locked', 'UNREAD_POSTS_LOCKED'),
+            'FOLDER_STICKY_IMG'          => $this->user->img('sticky_read', 'POST_STICKY'),
+            'FOLDER_STICKY_UNREAD_IMG'   => $this->user->img('sticky_unread', 'POST_STICKY'),
+            'FOLDER_ANNOUNCE_IMG'        => $this->user->img('announce_read', 'POST_ANNOUNCEMENT'),
+            'FOLDER_ANNOUNCE_UNREAD_IMG' => $this->user->img('announce_unread', 'POST_ANNOUNCEMENT'),
+            'FOLDER_MOVED_IMG'           => $this->user->img('topic_moved', 'TOPIC_MOVED'),
+            'REPORTED_IMG'               => $this->user->img('icon_topic_reported', 'TOPIC_REPORTED'),
+            'UNAPPROVED_IMG'             => $this->user->img('icon_topic_unapproved', 'TOPIC_UNAPPROVED'),
+            'DELETED_IMG'                => $this->user->img('icon_topic_deleted', 'TOPIC_DELETED'),
+            'POLL_IMG'                   => $this->user->img('icon_topic_poll', 'TOPIC_POLL'),
+            'GOTO_PAGE_IMG'              => $this->user->img('icon_post_target', 'GOTO_PAGE'),
 
-            'L_NO_TOPICS' 			=> ($forum_data['forum_status'] == ITEM_LOCKED) ? $this->user->lang['POST_FORUM_LOCKED'] : $this->user->lang['NO_TOPICS'],
+            'L_NO_TOPICS' => ($forum_data['forum_status'] == ITEM_LOCKED) ? $this->user->lang['POST_FORUM_LOCKED'] : $this->user->lang['NO_TOPICS'],
 
-            'S_DISPLAY_POST_INFO'	=> ($forum_data['forum_type'] == FORUM_POST && ($this->auth->acl_get('f_post', $forum_id) || $this->user->data['user_id'] == ANONYMOUS)) ? true : false,
+            'S_DISPLAY_POST_INFO' => ($forum_data['forum_type'] == FORUM_POST && ($this->auth->acl_get('f_post', $forum_id) || $this->user->data['user_id'] == ANONYMOUS)) ? true : false,
 
-            'S_IS_POSTABLE'			=> ($forum_data['forum_type'] == FORUM_POST) ? true : false,
-            'S_USER_CAN_POST'		=> ($this->auth->acl_get('f_post', $forum_id)) ? true : false,
-            'S_DISPLAY_ACTIVE'		=> $s_display_active,
-            'S_SELECT_SORT_DIR'		=> $s_sort_dir,
-            'S_SELECT_SORT_KEY'		=> $s_sort_key,
-            'S_SELECT_SORT_DAYS'	=> $s_limit_days,
-            'S_TOPIC_ICONS'			=> ($s_display_active && sizeof($active_forum_ary)) ? max($active_forum_ary['enable_icons']) : (($forum_data['enable_icons']) ? true : false),
-            'U_WATCH_FORUM_LINK'	=> $this->viewforum_swap($s_watching_forum['link']),
-            'U_WATCH_FORUM_TOGGLE'	=> $this->viewforum_swap($s_watching_forum['link_toggle']),
-            'S_WATCH_FORUM_TITLE'	=> $s_watching_forum['title'],
-            'S_WATCH_FORUM_TOGGLE'	=> $s_watching_forum['title_toggle'],
-            'S_WATCHING_FORUM'		=> $s_watching_forum['is_watching'],
-            'S_FORUM_ACTION'		=> append_sid("{$this->phpbb_root_path}index.{$this->php_ext}", "f=$forum_id" . (($start == 0) ? '' : "&amp;start=$start")),
-            'S_DISPLAY_SEARCHBOX'	=> ($this->auth->acl_get('u_search') && $this->auth->acl_get('f_search', $forum_id) && $this->config['load_search']) ? true : false,
-            'S_SEARCHBOX_ACTION'	=> append_sid("{$this->phpbb_root_path}search.{$this->php_ext}"),
-            'S_SEARCH_LOCAL_HIDDEN_FIELDS'	=> build_hidden_fields($s_search_hidden_fields),
-            'S_SINGLE_MODERATOR'	=> (!empty($moderators[$forum_id]) && sizeof($moderators[$forum_id]) > 1) ? false : true,
-            'S_IS_LOCKED'			=> ($forum_data['forum_status'] == ITEM_LOCKED) ? true : false,
-            'S_PHPBBASIC_ENABLED'	=> true,
+            'S_IS_POSTABLE'                => ($forum_data['forum_type'] == FORUM_POST) ? true : false,
+            'S_USER_CAN_POST'              => ($this->auth->acl_get('f_post', $forum_id)) ? true : false,
+            'S_DISPLAY_ACTIVE'             => $s_display_active,
+            'S_SELECT_SORT_DIR'            => $s_sort_dir,
+            'S_SELECT_SORT_KEY'            => $s_sort_key,
+            'S_SELECT_SORT_DAYS'           => $s_limit_days,
+            'S_TOPIC_ICONS'                => ($s_display_active && sizeof($active_forum_ary)) ? max($active_forum_ary['enable_icons']) : (($forum_data['enable_icons']) ? true : false),
+            'U_WATCH_FORUM_LINK'           => $this->viewforum_swap($s_watching_forum['link']),
+            'U_WATCH_FORUM_TOGGLE'         => $this->viewforum_swap($s_watching_forum['link_toggle']),
+            'S_WATCH_FORUM_TITLE'          => $s_watching_forum['title'],
+            'S_WATCH_FORUM_TOGGLE'         => $s_watching_forum['title_toggle'],
+            'S_WATCHING_FORUM'             => $s_watching_forum['is_watching'],
+            'S_FORUM_ACTION'               => append_sid("{$this->phpbb_root_path}index.{$this->php_ext}", "f=$forum_id" . (($start == 0) ? '' : "&amp;start=$start")),
+            'S_DISPLAY_SEARCHBOX'          => ($this->auth->acl_get('u_search') && $this->auth->acl_get('f_search', $forum_id) && $this->config['load_search']) ? true : false,
+            'S_SEARCHBOX_ACTION'           => append_sid("{$this->phpbb_root_path}search.{$this->php_ext}"),
+            'S_SEARCH_LOCAL_HIDDEN_FIELDS' => build_hidden_fields($s_search_hidden_fields),
+            'S_SINGLE_MODERATOR'           => (!empty($moderators[$forum_id]) && sizeof($moderators[$forum_id]) > 1) ? false : true,
+            'S_IS_LOCKED'                  => ($forum_data['forum_status'] == ITEM_LOCKED) ? true : false,
+            'S_PHPBBASIC_ENABLED'          => true,
 
-            'U_MCP'				=> ($this->auth->acl_get('m_', $forum_id)) ? append_sid("{$this->phpbb_root_path}mcp.{$this->php_ext}", "f=$forum_id&amp;i=main&amp;mode=forum_view", true, $this->user->session_id) : '',
-            'U_POST_NEW_TOPIC'	=> ($this->auth->acl_get('f_post', $forum_id) || $this->user->data['user_id'] == ANONYMOUS) ? append_sid("{$this->phpbb_root_path}posting.{$this->php_ext}", 'mode=post&amp;f=' . $forum_id) : '',
-            'U_VIEW_FORUM'		=> append_sid("{$this->phpbb_root_path}index.{$this->php_ext}", "f=$forum_id" . ((strlen($u_sort_param)) ? "&amp;$u_sort_param" : '') . (($start == 0) ? '' : "&amp;start=$start")),
-            'U_CANONICAL'		=> generate_board_url() . '/' . append_sid("index.{$this->php_ext}", "f=$forum_id" . (($start) ? "&amp;start=$start" : ''), true, ''),
-            'U_MARK_TOPICS'		=> ($this->user->data['is_registered'] || $this->config['load_anon_lastread']) ? append_sid("{$this->phpbb_root_path}index.{$this->php_ext}", 'hash=' . generate_link_hash('global') . "&amp;f=$forum_id&amp;mark=topics&amp;mark_time=" . time()) : '',
-            'U_MARK_FORUMS'     => false,
+            'U_MCP'            => ($this->auth->acl_get('m_', $forum_id)) ? append_sid("{$this->phpbb_root_path}mcp.{$this->php_ext}", "f=$forum_id&amp;i=main&amp;mode=forum_view", true, $this->user->session_id) : '',
+            'U_POST_NEW_TOPIC' => ($this->auth->acl_get('f_post', $forum_id) || $this->user->data['user_id'] == ANONYMOUS) ? append_sid("{$this->phpbb_root_path}posting.{$this->php_ext}", 'mode=post&amp;f=' . $forum_id) : '',
+            'U_VIEW_FORUM'     => append_sid("{$this->phpbb_root_path}index.{$this->php_ext}", "f=$forum_id" . ((strlen($u_sort_param)) ? "&amp;$u_sort_param" : '') . (($start == 0) ? '' : "&amp;start=$start")),
+            'U_CANONICAL'      => generate_board_url() . '/' . append_sid("index.{$this->php_ext}", "f=$forum_id" . (($start) ? "&amp;start=$start" : ''), true, ''),
+            'U_MARK_TOPICS'    => ($this->user->data['is_registered'] || $this->config['load_anon_lastread']) ? append_sid("{$this->phpbb_root_path}index.{$this->php_ext}", 'hash=' . generate_link_hash('global') . "&amp;f=$forum_id&amp;mark=topics&amp;mark_time=" . time()) : '',
+            'U_MARK_FORUMS'    => false,
         ));
 
         // Grab icons
@@ -532,11 +520,11 @@ class listener implements EventSubscriberInterface
         $rowset = $announcement_list = $topic_list = $global_announce_forums = array();
 
         $sql_array = array(
-            'SELECT'	=> 't.*',
-            'FROM'		=> array(
-                TOPICS_TABLE		=> 't'
+            'SELECT'    => 't.*',
+            'FROM'      => array(
+                TOPICS_TABLE => 't'
             ),
-            'LEFT_JOIN'	=> array(),
+            'LEFT_JOIN' => array(),
         );
 
         /**
@@ -545,14 +533,14 @@ class listener implements EventSubscriberInterface
          * It may also be used to override the above assigned template vars
          *
          * @event core.viewforum_get_topic_data
-         * @var	array	forum_data			Array with forum data
-         * @var	array	sql_array			The SQL array to get the data of all topics
-         * @var	int		forum_id			The forum_id whose topics are being listed
-         * @var	int		topics_count		The total number of topics for display
-         * @var	int		sort_days			The oldest topic displayable in elapsed days
-         * @var	string	sort_key			The sorting by. It is one of the first character of (in low case):
-         *									Author, Post time, Replies, Subject, Views
-         * @var	string	sort_dir			Either "a" for ascending or "d" for descending
+         * @var    array    forum_data            Array with forum data
+         * @var    array    sql_array            The SQL array to get the data of all topics
+         * @var    int        forum_id            The forum_id whose topics are being listed
+         * @var    int        topics_count        The total number of topics for display
+         * @var    int        sort_days            The oldest topic displayable in elapsed days
+         * @var    string    sort_key            The sorting by. It is one of the first character of (in low case):
+         *                                    Author, Post time, Replies, Subject, Views
+         * @var    string    sort_dir            Either "a" for ascending or "d" for descending
          * @since 3.1.0-a1
          * @change 3.1.0-RC4 Added forum_data var
          * @change 3.1.4-RC1 Added forum_id, topics_count, sort_days, sort_key and sort_dir vars
@@ -604,27 +592,27 @@ class listener implements EventSubscriberInterface
 
             // Obtain announcements ... removed sort ordering, sort by time in all cases
             $sql_ary = array(
-                'SELECT'	=> $sql_anounce_array['SELECT'],
-                'FROM'		=> $sql_array['FROM'],
-                'LEFT_JOIN'	=> $sql_anounce_array['LEFT_JOIN'],
+                'SELECT'    => $sql_anounce_array['SELECT'],
+                'FROM'      => $sql_array['FROM'],
+                'LEFT_JOIN' => $sql_anounce_array['LEFT_JOIN'],
 
-                'WHERE'		=> '(t.forum_id = ' . $forum_id . '
+                'WHERE' => '(t.forum_id = ' . $forum_id . '
 				AND t.topic_type = ' . POST_ANNOUNCE . ') OR
 			(' . $this->db->sql_in_set('t.forum_id', $g_forum_ary) . '
 				AND t.topic_type = ' . POST_GLOBAL . ')',
 
-                'ORDER_BY'	=> 't.topic_time DESC',
+                'ORDER_BY' => 't.topic_time DESC',
             );
 
             /**
              * Event to modify the SQL query before the announcement topic ids data is retrieved
              *
              * @event core.viewforum_get_announcement_topic_ids_data
-             * @var	array	forum_data			Data about the forum
-             * @var	array	g_forum_ary			Global announcement forums array
-             * @var	array	sql_anounce_array	SQL announcement array
-             * @var	array	sql_ary				SQL query array to get the announcement topic ids data
-             * @var	int		forum_id			The forum ID
+             * @var    array    forum_data            Data about the forum
+             * @var    array    g_forum_ary            Global announcement forums array
+             * @var    array    sql_anounce_array    SQL announcement array
+             * @var    array    sql_ary                SQL query array to get the announcement topic ids data
+             * @var    int        forum_id            The forum ID
              *
              * @since 3.1.10-RC1
              */
@@ -694,8 +682,7 @@ class listener implements EventSubscriberInterface
 
             $sql_limit = $pagination->reverse_limit($start, $sql_limit, $topics_count - sizeof($announcement_list));
             $sql_start = $pagination->reverse_start($start, $sql_limit, $topics_count - sizeof($announcement_list));
-        }
-        else
+        } else
         {
             // Select the sort order
             $direction = (($sort_dir == 'd') ? 'DESC' : 'ASC');
@@ -705,8 +692,7 @@ class listener implements EventSubscriberInterface
         if (is_array($sort_by_sql[$sort_key]))
         {
             $sql_sort_order = implode(' ' . $direction . ', ', $sort_by_sql[$sort_key]) . ' ' . $direction;
-        }
-        else
+        } else
         {
             $sql_sort_order = $sort_by_sql[$sort_key] . ' ' . $direction;
         }
@@ -714,12 +700,10 @@ class listener implements EventSubscriberInterface
         if ($forum_data['forum_type'] == FORUM_POST || !sizeof($active_forum_ary))
         {
             $sql_where = 't.forum_id = ' . $forum_id;
-        }
-        else if (empty($active_forum_ary['exclude_forum_id']))
+        } else if (empty($active_forum_ary['exclude_forum_id']))
         {
             $sql_where = $this->db->sql_in_set('t.forum_id', $active_forum_ary['forum_id']);
-        }
-        else
+        } else
         {
             $get_forum_ids = array_diff($active_forum_ary['forum_id'], $active_forum_ary['exclude_forum_id']);
             $sql_where = (sizeof($get_forum_ids)) ? $this->db->sql_in_set('t.forum_id', $get_forum_ids) : 't.forum_id = ' . $forum_id;
@@ -727,30 +711,30 @@ class listener implements EventSubscriberInterface
 
         // Grab just the sorted topic ids
         $sql_ary = array(
-            'SELECT'	=> 't.topic_id',
-            'FROM'		=> array(
+            'SELECT'   => 't.topic_id',
+            'FROM'     => array(
                 TOPICS_TABLE => 't',
             ),
-            'WHERE'		=> "$sql_where
+            'WHERE'    => "$sql_where
 		AND t.topic_type IN (" . POST_NORMAL . ', ' . POST_STICKY . ")
 		$sql_approved
 		$sql_limit_time",
-            'ORDER_BY'	=> 't.topic_type ' . ((!$store_reverse) ? 'DESC' : 'ASC') . ', ' . $sql_sort_order,
+            'ORDER_BY' => 't.topic_type ' . ((!$store_reverse) ? 'DESC' : 'ASC') . ', ' . $sql_sort_order,
         );
 
         /**
          * Event to modify the SQL query before the topic ids data is retrieved
          *
          * @event core.viewforum_get_topic_ids_data
-         * @var	array	forum_data		Data about the forum
-         * @var	array	sql_ary			SQL query array to get the topic ids data
-         * @var	string	sql_approved	Topic visibility SQL string
-         * @var	int		sql_limit		Number of records to select
-         * @var	string	sql_limit_time	SQL string to limit topic_last_post_time data
-         * @var	array	sql_sort_order	SQL sorting string
-         * @var	int		sql_start		Offset point to start selection from
-         * @var	string	sql_where		SQL WHERE clause string
-         * @var	bool	store_reverse	Flag indicating if we select from the late pages
+         * @var    array    forum_data        Data about the forum
+         * @var    array    sql_ary            SQL query array to get the topic ids data
+         * @var    string    sql_approved    Topic visibility SQL string
+         * @var    int        sql_limit        Number of records to select
+         * @var    string    sql_limit_time    SQL string to limit topic_last_post_time data
+         * @var    array    sql_sort_order    SQL sorting string
+         * @var    int        sql_start        Offset point to start selection from
+         * @var    string    sql_where        SQL WHERE clause string
+         * @var    bool    store_reverse    Flag indicating if we select from the late pages
          *
          * @since 3.1.0-RC4
          *
@@ -774,7 +758,7 @@ class listener implements EventSubscriberInterface
 
         while ($row = $this->db->sql_fetchrow($result))
         {
-            $topic_list[] = (int) $row['topic_id'];
+            $topic_list[] = (int)$row['topic_id'];
         }
         $this->db->sql_freeresult($result);
 
@@ -785,11 +769,11 @@ class listener implements EventSubscriberInterface
         {
             // SQL array for obtaining topics/stickies
             $sql_array = array(
-                'SELECT'		=> $sql_array['SELECT'],
-                'FROM'			=> $sql_array['FROM'],
-                'LEFT_JOIN'		=> $sql_array['LEFT_JOIN'],
+                'SELECT'    => $sql_array['SELECT'],
+                'FROM'      => $sql_array['FROM'],
+                'LEFT_JOIN' => $sql_array['LEFT_JOIN'],
 
-                'WHERE'			=> $this->db->sql_in_set('t.topic_id', $topic_list),
+                'WHERE' => $this->db->sql_in_set('t.topic_id', $topic_list),
             );
 
             // If store_reverse, then first obtain topics, then stickies, else the other way around...
@@ -815,18 +799,18 @@ class listener implements EventSubscriberInterface
         {
             // SQL array for obtaining shadow topics
             $sql_array = array(
-                'SELECT'	=> 't.*',
-                'FROM'		=> array(
-                    TOPICS_TABLE		=> 't'
+                'SELECT' => 't.*',
+                'FROM'   => array(
+                    TOPICS_TABLE => 't'
                 ),
-                'WHERE'		=> $this->db->sql_in_set('t.topic_id', array_keys($shadow_topic_list)),
+                'WHERE'  => $this->db->sql_in_set('t.topic_id', array_keys($shadow_topic_list)),
             );
 
             /**
              * Event to modify the SQL query before the shadowtopic data is retrieved
              *
              * @event core.viewforum_get_shadowtopic_data
-             * @var	array	sql_array		SQL array to get the data of any shadowtopics
+             * @var    array    sql_array        SQL array to get the data of any shadowtopics
              * @since 3.1.0-a1
              */
             $vars = array('sql_array');
@@ -863,10 +847,10 @@ class listener implements EventSubscriberInterface
 
                 // We want to retain some values
                 $row = array_merge($row, array(
-                    'topic_moved_id'	=> $rowset[$orig_topic_id]['topic_moved_id'],
-                    'topic_status'		=> $rowset[$orig_topic_id]['topic_status'],
-                    'topic_type'		=> $rowset[$orig_topic_id]['topic_type'],
-                    'topic_title'		=> $rowset[$orig_topic_id]['topic_title'],
+                    'topic_moved_id' => $rowset[$orig_topic_id]['topic_moved_id'],
+                    'topic_status'   => $rowset[$orig_topic_id]['topic_status'],
+                    'topic_type'     => $rowset[$orig_topic_id]['topic_type'],
+                    'topic_title'    => $rowset[$orig_topic_id]['topic_title'],
                 ));
 
                 // Shadow topics are never reported
@@ -892,7 +876,7 @@ class listener implements EventSubscriberInterface
         $pagination->generate_template_pagination($base_url, 'pagination', 'start', $total_topic_count, $this->config['topics_per_page'], $start);
 
         $this->template->assign_vars(array(
-            'TOTAL_TOPICS'	=> ($s_display_active) ? false : $this->user->lang('VIEW_FORUM_TOPICS', (int) $total_topic_count),
+            'TOTAL_TOPICS' => ($s_display_active) ? false : $this->user->lang('VIEW_FORUM_TOPICS', (int)$total_topic_count),
         ));
 
         $topic_list = ($store_reverse) ? array_merge($announcement_list, array_reverse($topic_list)) : array_merge($announcement_list, $topic_list);
@@ -902,9 +886,9 @@ class listener implements EventSubscriberInterface
          * Modify topics data before we display the viewforum page
          *
          * @event core.viewforum_modify_topics_data
-         * @var	array	topic_list			Array with current viewforum page topic ids
-         * @var	array	rowset				Array with topics data (in topic_id => topic_data format)
-         * @var	int		total_topic_count	Forum's total topic count
+         * @var    array    topic_list            Array with current viewforum page topic ids
+         * @var    array    rowset                Array with topics data (in topic_id => topic_data format)
+         * @var    int        total_topic_count    Forum's total topic count
          * @since 3.1.0-b3
          */
         $vars = array('topic_list', 'rowset', 'total_topic_count');
@@ -926,7 +910,7 @@ class listener implements EventSubscriberInterface
                 }
 
                 $topic_forum_list[$row['forum_id']]['forum_mark_time'] = ($this->config['load_db_lastread'] && $this->user->data['is_registered'] && isset($row['forum_mark_time'])) ? $row['forum_mark_time'] : 0;
-                $topic_forum_list[$row['forum_id']]['topics'][] = (int) $t_id;
+                $topic_forum_list[$row['forum_id']]['topics'][] = (int)$t_id;
             }
 
             if ($this->config['load_db_lastread'] && $this->user->data['is_registered'])
@@ -935,8 +919,7 @@ class listener implements EventSubscriberInterface
                 {
                     $topic_tracking_info += get_topic_tracking($f_id, $topic_row['topics'], $rowset, array($f_id => $topic_row['forum_mark_time']));
                 }
-            }
-            else if ($this->config['load_anon_lastread'] || $this->user->data['is_registered'])
+            } else if ($this->config['load_anon_lastread'] || $this->user->data['is_registered'])
             {
                 foreach ($topic_forum_list as $f_id => $topic_row)
                 {
@@ -951,14 +934,13 @@ class listener implements EventSubscriberInterface
                 if ($this->config['load_db_lastread'] && $this->user->data['is_registered'])
                 {
                     $mark_time_forum = (!empty($forum_data['mark_time'])) ? $forum_data['mark_time'] : $this->user->data['user_lastmark'];
-                }
-                else if ($this->config['load_anon_lastread'] || $this->user->data['is_registered'])
+                } else if ($this->config['load_anon_lastread'] || $this->user->data['is_registered'])
                 {
                     if (!$this->user->data['is_registered'])
                     {
-                        $this->user->data['user_lastmark'] = (isset($tracking_topics['l'])) ? (int) (base_convert($tracking_topics['l'], 36, 10) + $this->config['board_startdate']) : 0;
+                        $this->user->data['user_lastmark'] = (isset($tracking_topics['l'])) ? (int)(base_convert($tracking_topics['l'], 36, 10) + $this->config['board_startdate']) : 0;
                     }
-                    $mark_time_forum = (isset($tracking_topics['f'][$forum_id])) ? (int) (base_convert($tracking_topics['f'][$forum_id], 36, 10) + $this->config['board_startdate']) : $this->user->data['user_lastmark'];
+                    $mark_time_forum = (isset($tracking_topics['f'][$forum_id])) ? (int)(base_convert($tracking_topics['f'][$forum_id], 36, 10) + $this->config['board_startdate']) : $this->user->data['user_lastmark'];
                 }
             }
 
@@ -967,7 +949,7 @@ class listener implements EventSubscriberInterface
             {
                 $row = &$rowset[$topic_id];
 
-                $topic_forum_id = ($row['forum_id']) ? (int) $row['forum_id'] : $forum_id;
+                $topic_forum_id = ($row['forum_id']) ? (int)$row['forum_id'] : $forum_id;
 
                 // This will allow the style designer to output a different header
                 // or even separate the list of announcements from sticky and normal topics
@@ -980,8 +962,7 @@ class listener implements EventSubscriberInterface
                 {
                     $topic_id = $row['topic_moved_id'];
                     $unread_topic = false;
-                }
-                else
+                } else
                 {
                     $unread_topic = (isset($topic_tracking_info[$topic_id]) && $row['topic_last_post_time'] > $topic_tracking_info[$topic_id]) ? true : false;
                 }
@@ -1003,68 +984,68 @@ class listener implements EventSubscriberInterface
 
                 // Send vars to template
                 $topic_row = array(
-                    'FORUM_ID'					=> $row['forum_id'],
-                    'TOPIC_ID'					=> $topic_id,
-                    'TOPIC_AUTHOR'				=> get_username_string('username', $row['topic_poster'], $row['topic_first_poster_name'], $row['topic_first_poster_colour']),
-                    'TOPIC_AUTHOR_COLOUR'		=> get_username_string('colour', $row['topic_poster'], $row['topic_first_poster_name'], $row['topic_first_poster_colour']),
-                    'TOPIC_AUTHOR_FULL'			=> get_username_string('full', $row['topic_poster'], $row['topic_first_poster_name'], $row['topic_first_poster_colour']),
-                    'FIRST_POST_TIME'			=> $this->user->format_date($row['topic_time']),
-                    'LAST_POST_SUBJECT'			=> censor_text($row['topic_last_post_subject']),
-                    'LAST_POST_TIME'			=> $this->user->format_date($row['topic_last_post_time']),
-                    'LAST_VIEW_TIME'			=> $this->user->format_date($row['topic_last_view_time']),
-                    'LAST_POST_AUTHOR'			=> get_username_string('username', $row['topic_last_poster_id'], $row['topic_last_poster_name'], $row['topic_last_poster_colour']),
-                    'LAST_POST_AUTHOR_COLOUR'	=> get_username_string('colour', $row['topic_last_poster_id'], $row['topic_last_poster_name'], $row['topic_last_poster_colour']),
-                    'LAST_POST_AUTHOR_FULL'		=> get_username_string('full', $row['topic_last_poster_id'], $row['topic_last_poster_name'], $row['topic_last_poster_colour']),
+                    'FORUM_ID'                => $row['forum_id'],
+                    'TOPIC_ID'                => $topic_id,
+                    'TOPIC_AUTHOR'            => get_username_string('username', $row['topic_poster'], $row['topic_first_poster_name'], $row['topic_first_poster_colour']),
+                    'TOPIC_AUTHOR_COLOUR'     => get_username_string('colour', $row['topic_poster'], $row['topic_first_poster_name'], $row['topic_first_poster_colour']),
+                    'TOPIC_AUTHOR_FULL'       => get_username_string('full', $row['topic_poster'], $row['topic_first_poster_name'], $row['topic_first_poster_colour']),
+                    'FIRST_POST_TIME'         => $this->user->format_date($row['topic_time']),
+                    'LAST_POST_SUBJECT'       => censor_text($row['topic_last_post_subject']),
+                    'LAST_POST_TIME'          => $this->user->format_date($row['topic_last_post_time']),
+                    'LAST_VIEW_TIME'          => $this->user->format_date($row['topic_last_view_time']),
+                    'LAST_POST_AUTHOR'        => get_username_string('username', $row['topic_last_poster_id'], $row['topic_last_poster_name'], $row['topic_last_poster_colour']),
+                    'LAST_POST_AUTHOR_COLOUR' => get_username_string('colour', $row['topic_last_poster_id'], $row['topic_last_poster_name'], $row['topic_last_poster_colour']),
+                    'LAST_POST_AUTHOR_FULL'   => get_username_string('full', $row['topic_last_poster_id'], $row['topic_last_poster_name'], $row['topic_last_poster_colour']),
 
-                    'REPLIES'			=> $replies,
-                    'VIEWS'				=> $row['topic_views'],
-                    'TOPIC_TITLE'		=> censor_text($row['topic_title']),
-                    'TOPIC_TYPE'		=> $topic_type,
-                    'FORUM_NAME'		=> (isset($row['forum_name'])) ? $row['forum_name'] : $forum_data['forum_name'],
+                    'REPLIES'     => $replies,
+                    'VIEWS'       => $row['topic_views'],
+                    'TOPIC_TITLE' => censor_text($row['topic_title']),
+                    'TOPIC_TYPE'  => $topic_type,
+                    'FORUM_NAME'  => (isset($row['forum_name'])) ? $row['forum_name'] : $forum_data['forum_name'],
 
-                    'TOPIC_IMG_STYLE'		=> $folder_img,
-                    'TOPIC_FOLDER_IMG'		=> $this->user->img($folder_img, $folder_alt),
-                    'TOPIC_FOLDER_IMG_ALT'	=> $this->user->lang[$folder_alt],
+                    'TOPIC_IMG_STYLE'      => $folder_img,
+                    'TOPIC_FOLDER_IMG'     => $this->user->img($folder_img, $folder_alt),
+                    'TOPIC_FOLDER_IMG_ALT' => $this->user->lang[$folder_alt],
 
-                    'TOPIC_ICON_IMG'		=> (!empty($icons[$row['icon_id']])) ? $icons[$row['icon_id']]['img'] : '',
-                    'TOPIC_ICON_IMG_WIDTH'	=> (!empty($icons[$row['icon_id']])) ? $icons[$row['icon_id']]['width'] : '',
-                    'TOPIC_ICON_IMG_HEIGHT'	=> (!empty($icons[$row['icon_id']])) ? $icons[$row['icon_id']]['height'] : '',
-                    'ATTACH_ICON_IMG'		=> ($this->auth->acl_get('u_download') && $this->auth->acl_get('f_download', $row['forum_id']) && $row['topic_attachment']) ? $this->user->img('icon_topic_attach', $this->user->lang['TOTAL_ATTACHMENTS']) : '',
-                    'UNAPPROVED_IMG'		=> ($topic_unapproved || $posts_unapproved) ? $this->user->img('icon_topic_unapproved', ($topic_unapproved) ? 'TOPIC_UNAPPROVED' : 'POSTS_UNAPPROVED') : '',
+                    'TOPIC_ICON_IMG'        => (!empty($icons[$row['icon_id']])) ? $icons[$row['icon_id']]['img'] : '',
+                    'TOPIC_ICON_IMG_WIDTH'  => (!empty($icons[$row['icon_id']])) ? $icons[$row['icon_id']]['width'] : '',
+                    'TOPIC_ICON_IMG_HEIGHT' => (!empty($icons[$row['icon_id']])) ? $icons[$row['icon_id']]['height'] : '',
+                    'ATTACH_ICON_IMG'       => ($this->auth->acl_get('u_download') && $this->auth->acl_get('f_download', $row['forum_id']) && $row['topic_attachment']) ? $this->user->img('icon_topic_attach', $this->user->lang['TOTAL_ATTACHMENTS']) : '',
+                    'UNAPPROVED_IMG'        => ($topic_unapproved || $posts_unapproved) ? $this->user->img('icon_topic_unapproved', ($topic_unapproved) ? 'TOPIC_UNAPPROVED' : 'POSTS_UNAPPROVED') : '',
 
-                    'S_TOPIC_TYPE'			=> $row['topic_type'],
-                    'S_USER_POSTED'			=> (isset($row['topic_posted']) && $row['topic_posted']) ? true : false,
-                    'S_UNREAD_TOPIC'		=> $unread_topic,
-                    'S_TOPIC_REPORTED'		=> (!empty($row['topic_reported']) && $this->auth->acl_get('m_report', $row['forum_id'])) ? true : false,
-                    'S_TOPIC_UNAPPROVED'	=> $topic_unapproved,
-                    'S_POSTS_UNAPPROVED'	=> $posts_unapproved,
-                    'S_TOPIC_DELETED'		=> $topic_deleted,
-                    'S_HAS_POLL'			=> ($row['poll_start']) ? true : false,
-                    'S_POST_ANNOUNCE'		=> ($row['topic_type'] == POST_ANNOUNCE) ? true : false,
-                    'S_POST_GLOBAL'			=> ($row['topic_type'] == POST_GLOBAL) ? true : false,
-                    'S_POST_STICKY'			=> ($row['topic_type'] == POST_STICKY) ? true : false,
-                    'S_TOPIC_LOCKED'		=> ($row['topic_status'] == ITEM_LOCKED) ? true : false,
-                    'S_TOPIC_MOVED'			=> ($row['topic_status'] == ITEM_MOVED) ? true : false,
+                    'S_TOPIC_TYPE'       => $row['topic_type'],
+                    'S_USER_POSTED'      => (isset($row['topic_posted']) && $row['topic_posted']) ? true : false,
+                    'S_UNREAD_TOPIC'     => $unread_topic,
+                    'S_TOPIC_REPORTED'   => (!empty($row['topic_reported']) && $this->auth->acl_get('m_report', $row['forum_id'])) ? true : false,
+                    'S_TOPIC_UNAPPROVED' => $topic_unapproved,
+                    'S_POSTS_UNAPPROVED' => $posts_unapproved,
+                    'S_TOPIC_DELETED'    => $topic_deleted,
+                    'S_HAS_POLL'         => ($row['poll_start']) ? true : false,
+                    'S_POST_ANNOUNCE'    => ($row['topic_type'] == POST_ANNOUNCE) ? true : false,
+                    'S_POST_GLOBAL'      => ($row['topic_type'] == POST_GLOBAL) ? true : false,
+                    'S_POST_STICKY'      => ($row['topic_type'] == POST_STICKY) ? true : false,
+                    'S_TOPIC_LOCKED'     => ($row['topic_status'] == ITEM_LOCKED) ? true : false,
+                    'S_TOPIC_MOVED'      => ($row['topic_status'] == ITEM_MOVED) ? true : false,
 
-                    'U_NEWEST_POST'			=> append_sid("{$this->phpbb_root_path}viewtopic.{$this->php_ext}", $view_topic_url_params . '&amp;view=unread') . '#unread',
-                    'U_LAST_POST'			=> append_sid("{$this->phpbb_root_path}viewtopic.{$this->php_ext}", $view_topic_url_params . '&amp;p=' . $row['topic_last_post_id']) . '#p' . $row['topic_last_post_id'],
-                    'U_LAST_POST_AUTHOR'	=> get_username_string('profile', $row['topic_last_poster_id'], $row['topic_last_poster_name'], $row['topic_last_poster_colour']),
-                    'U_TOPIC_AUTHOR'		=> get_username_string('profile', $row['topic_poster'], $row['topic_first_poster_name'], $row['topic_first_poster_colour']),
-                    'U_VIEW_TOPIC'			=> $view_topic_url,
-                    'U_MCP_REPORT'			=> append_sid("{$this->phpbb_root_path}mcp.{$this->php_ext}", 'i=reports&amp;mode=reports&amp;f=' . $row['forum_id'] . '&amp;t=' . $topic_id, true, $this->user->session_id),
-                    'U_MCP_QUEUE'			=> $u_mcp_queue,
+                    'U_NEWEST_POST'      => append_sid("{$this->phpbb_root_path}viewtopic.{$this->php_ext}", $view_topic_url_params . '&amp;view=unread') . '#unread',
+                    'U_LAST_POST'        => append_sid("{$this->phpbb_root_path}viewtopic.{$this->php_ext}", $view_topic_url_params . '&amp;p=' . $row['topic_last_post_id']) . '#p' . $row['topic_last_post_id'],
+                    'U_LAST_POST_AUTHOR' => get_username_string('profile', $row['topic_last_poster_id'], $row['topic_last_poster_name'], $row['topic_last_poster_colour']),
+                    'U_TOPIC_AUTHOR'     => get_username_string('profile', $row['topic_poster'], $row['topic_first_poster_name'], $row['topic_first_poster_colour']),
+                    'U_VIEW_TOPIC'       => $view_topic_url,
+                    'U_MCP_REPORT'       => append_sid("{$this->phpbb_root_path}mcp.{$this->php_ext}", 'i=reports&amp;mode=reports&amp;f=' . $row['forum_id'] . '&amp;t=' . $topic_id, true, $this->user->session_id),
+                    'U_MCP_QUEUE'        => $u_mcp_queue,
 
-                    'S_TOPIC_TYPE_SWITCH'	=> ($s_type_switch == $s_type_switch_test) ? -1 : $s_type_switch_test,
+                    'S_TOPIC_TYPE_SWITCH' => ($s_type_switch == $s_type_switch_test) ? -1 : $s_type_switch_test,
                 );
 
                 /**
                  * Modify the topic data before it is assigned to the template
                  *
                  * @event core.viewforum_modify_topicrow
-                 * @var	array	row					Array with topic data
-                 * @var	array	topic_row			Template array with topic data
-                 * @var	bool	s_type_switch		Flag indicating if the topic type is [global] announcement
-                 * @var	bool	s_type_switch_test	Flag indicating if the test topic type is [global] announcement
+                 * @var    array    row                    Array with topic data
+                 * @var    array    topic_row            Template array with topic data
+                 * @var    bool    s_type_switch        Flag indicating if the topic type is [global] announcement
+                 * @var    bool    s_type_switch_test    Flag indicating if the test topic type is [global] announcement
                  * @since 3.1.0-a1
                  *
                  * @changed 3.1.10-RC1 Added s_type_switch, s_type_switch_test
@@ -1072,9 +1053,9 @@ class listener implements EventSubscriberInterface
                 $vars = array('row', 'topic_row', 's_type_switch', 's_type_switch_test');
                 extract($this->phpbb_dispatcher->trigger_event('core.viewforum_modify_topicrow', compact($vars)));
 
-                $this->template->assign_block_vars('topicrow', $topic_row);
+                $this->template->assign_block_vars('topicrows', $topic_row);
 
-                $pagination->generate_template_pagination($view_topic_url, 'topicrow.pagination', 'start', $replies + 1, $this->config['posts_per_page'], 1, true, true);
+                $pagination->generate_template_pagination($view_topic_url, 'topicrows.pagination', 'start', $replies + 1, $this->config['posts_per_page'], 1, true, true);
 
                 $s_type_switch = ($row['topic_type'] == POST_ANNOUNCE || $row['topic_type'] == POST_GLOBAL) ? 1 : 0;
 
@@ -1082,12 +1063,12 @@ class listener implements EventSubscriberInterface
                  * Event after the topic data has been assigned to the template
                  *
                  * @event core.viewforum_topic_row_after
-                 * @var	array	row				Array with the topic data
-                 * @var	array	rowset			Array with topics data (in topic_id => topic_data format)
-                 * @var	bool	s_type_switch	Flag indicating if the topic type is [global] announcement
-                 * @var	int		topic_id		The topic ID
-                 * @var	array	topic_list		Array with current viewforum page topic ids
-                 * @var	array	topic_row		Template array with topic data
+                 * @var    array    row                Array with the topic data
+                 * @var    array    rowset            Array with topics data (in topic_id => topic_data format)
+                 * @var    bool    s_type_switch    Flag indicating if the topic type is [global] announcement
+                 * @var    int        topic_id        The topic ID
+                 * @var    array    topic_list        Array with current viewforum page topic ids
+                 * @var    array    topic_row        Template array with topic data
                  * @since 3.1.3-RC1
                  */
                 $vars = array(
@@ -1117,111 +1098,104 @@ class listener implements EventSubscriberInterface
         {
             update_forum_tracking_info($forum_id, $forum_data['forum_last_post_time'], false, $mark_time_forum);
         }
-	}
+    }
 
     /**
      * Modifies the sql when retrieving sub-forums
      *
      * @param object $event The event object
-     * @return null
-     * @access public
      */
     public function display_forums_modify_sql($event)
     {
-        if (!$this->phpbbasic_enabled)
+        if ($this->phpbbasic_enabled)
         {
-            return;
+            $sql_ary = $event['sql_ary'];
+            $sql_ary['WHERE'] = (empty($sql_ary['WHERE']) ? '' : $sql_ary['WHERE'] . ' AND ') . 'f.parent_id = ' . (int)$this->phpbbasic_forumid;
+            $event['sql_ary'] = $sql_ary;
         }
-        $sql_ary = $event['sql_ary'];
-        $sql_ary['WHERE'] = (empty($sql_ary['WHERE']) ? '' : $sql_ary['WHERE'] . ' AND ') . 'f.parent_id = ' . (int)$this->phpbbasic_forumid;
-        $event['sql_ary'] = $sql_ary;
     }
 
     /**
      * Looks for the breadcrumb for the phpBBasic forum ID. Also replaces viewforum with index.
      *
      * @param object $event The event object
-     * @return null
-     * @access public
      */
     public function generate_forum_nav($event)
     {
-        if (!$this->phpbbasic_enabled)
+        if ($this->phpbbasic_enabled)
         {
-            return;
-        }
+            $navlinks = $event['navlinks'];
+            $navlinks['U_VIEW_FORUM'] = $this->viewforum_swap($navlinks['U_VIEW_FORUM']);
+            $navlinks['PHPBBASIC_FORUM_BREADCRUMB'] = $navlinks['FORUM_ID'] == $this->phpbbasic_forumid;
+            $event['navlinks'] = $navlinks;
+            $navlinks_parents = $event['navlinks_parents'];
+            for ($i = 0; $i < count($navlinks_parents); $i++)
+            {
+                $navlinks_parents[$i]['U_VIEW_FORUM'] = $this->viewforum_swap($navlinks_parents[$i]['U_VIEW_FORUM']);
+                $navlinks_parents[$i]['PHPBBASIC_FORUM_BREADCRUMB'] = $navlinks_parents[$i]['FORUM_ID'] == $this->phpbbasic_forumid;
+            }
 
-        $navlinks = $event['navlinks'];
-        $navlinks['U_VIEW_FORUM'] = $this->viewforum_swap($navlinks['U_VIEW_FORUM']);
-        $navlinks['PHPBBASIC_FORUM_BREADCRUMB'] = $navlinks['FORUM_ID'] == $this->phpbbasic_forumid;
-        $event['navlinks'] = $navlinks;
-        $navlinks_parents = $event['navlinks_parents'];
-        for ($i = 0; $i < count($navlinks_parents); $i++)
-        {
-            $navlinks_parents[$i]['U_VIEW_FORUM'] = $this->viewforum_swap($navlinks_parents[$i]['U_VIEW_FORUM']);
-			$navlinks_parents[$i]['PHPBBASIC_FORUM_BREADCRUMB'] = $navlinks_parents[$i]['FORUM_ID'] == $this->phpbbasic_forumid;
+            $event['navlinks_parents'] = $navlinks_parents;
         }
-
-        $event['navlinks_parents'] = $navlinks_parents;
     }
 
-	/**
-	 * Sets branch_root_id to the phpBBasic forum ID
-	 *
-	 * @param object $event The event object
-	 * @return null
-	 * @access public
-	 */
+    /**
+     * Sets branch_root_id to the phpBBasic forum ID
+     *
+     * @param object $event The event object
+     */
     public function display_forums_modify_row($event)
-	{
-		$event['branch_root_id'] = $this->phpbbasic_forumid;
-	}
+    {
+        if ($this->phpbbasic_enabled)
+        {
+            $event['branch_root_id'] = $this->phpbbasic_forumid;
+        }
+    }
 
-	/**
-	 * Update any viewforum references to index in the sub-forum generation
-	 *
-	 * @param object $event The event object
-	 * @return null
-	 * @access public
-	 */
-	public function change_viewforum_to_index($event)
-	{
-		$keys = array('cat_row', 'last_catless', 'root_data', 'forum_row', 'subforums_row');
+    /**
+     * Update any viewforum references to index in the sub-forum generation
+     *
+     * @param object $event The event object
+     */
+    public function change_viewforum_to_index($event)
+    {
+        if ($this->phpbbasic_enabled)
+        {
+            $keys = array('cat_row', 'last_catless', 'root_data', 'forum_row', 'subforums_row');
 
-		foreach ($keys as $key)
-		{
-			if (isset($event[$key]))
-			{
-				$event[$key] = $this->check_and_replace_viewforum($event[$key]);
-			}
-		}
-	}
+            foreach ($keys as $key)
+            {
+                if (isset($event[$key]))
+                {
+                    $event[$key] = $this->check_and_replace_viewforum($event[$key]);
+                }
+            }
+        }
+    }
 
-	/**
-	 * Function to replace viewforum with index
-	 *
-	 * @param string $viewforum_ref The viewforum reference to swap
-	 * @return string
-	 * @access private
-	 */
-	private function viewforum_swap($viewforum_ref)
-	{
-		return str_replace("viewforum.{$this->php_ext}", "index.{$this->php_ext}", $viewforum_ref);
-	}
+    /**
+     * Function to replace viewforum with index
+     *
+     * @param string $viewforum_ref The viewforum reference to swap
+     * @return string
+     */
+    private function viewforum_swap($viewforum_ref)
+    {
+        return str_replace("viewforum.{$this->php_ext}", "index.{$this->php_ext}", $viewforum_ref);
+    }
 
-	/**
-	 * Checks for and replaces viewforum references
-	 *
-	 * @param array $viewforum_check The array from the event to check for viewforum references
-	 * @return array
-	 * @access private
-	 */
-	private function check_and_replace_viewforum($viewforum_check)
-	{
-		if (isset($viewforum_check['U_VIEWFORUM']))
-		{
-			$viewforum_check['U_VIEWFORUM'] = $this->viewforum_swap($viewforum_check['U_VIEWFORUM']);
-		}
-		return $viewforum_check;
-	}
+    /**
+     * Checks for and replaces viewforum references
+     *
+     * @param array $viewforum_check The array from the event to check for viewforum references
+     * @return array
+     */
+    private function check_and_replace_viewforum($viewforum_check)
+    {
+        if (isset($viewforum_check['U_VIEWFORUM']))
+        {
+            $viewforum_check['U_VIEWFORUM'] = $this->viewforum_swap($viewforum_check['U_VIEWFORUM']);
+        }
+        return $viewforum_check;
+    }
 }
