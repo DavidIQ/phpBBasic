@@ -4,7 +4,7 @@ services:
         arguments:
             - '@config'
             - '@request'
-            - '@service_container'
+            - '@cron.manager'
             - '@dbal.conn'
             - '@user'
             - '@auth'
@@ -12,6 +12,8 @@ services:
             - '@cache'
             - '@dispatcher'
             - '@path_helper'
+            - '@pagination'
+            - '@content.visibility'
             - '%core.root_path%'
             - '%core.php_ext%'
         tags:

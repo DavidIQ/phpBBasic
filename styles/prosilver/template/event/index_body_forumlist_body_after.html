@@ -4,6 +4,8 @@
 {% endif %}
 {% if FORUM_DESC or MODERATORS or U_MCP %}
 <div>
+	<!-- NOTE: remove the style="display: none" when you want to have the forum description on the forum body -->
+	{% if FORUM_DESC %}<div style="display: none !important;">{{ FORUM_DESC }}<br></div>{% endif %}
     {% if MODERATORS %}<p><strong>{% if S_SINGLE_MODERATOR %}{{ lang('MODERATOR') }}{% else %}{{ lang('MODERATORS') }}{% endif %}{{ lang('COLON') }}</strong> {{ MODERATORS }}</p>{% endif %}
 </div>
 {% endif %}
@@ -13,7 +15,7 @@
     <div class="inner">
 
         {% if U_FORUM_RULES %}
-        <a href="{U_FORUM_RULES}">{{ lang('FORUM_RULES') }}</a>
+        <a href="{{ U_FORUM_RULES }}">{{ lang('FORUM_RULES') }}</a>
         {% else %}
         <strong>{{ lang('FORUM_RULES') }}</strong><br>
         {{ FORUM_RULES }}
@@ -29,7 +31,7 @@
     {% if not S_IS_BOT and S_DISPLAY_POST_INFO %}
     {% EVENT viewforum_buttons_top_before %}
 
-    <a href="{U_POST_NEW_TOPIC}" class="button" title="{% if S_IS_LOCKED %}{{ lang('FORUM_LOCKED') }}{% else %}{{ lang('POST_TOPIC') }}{% endif %}">
+    <a href="{{ U_POST_NEW_TOPIC }}" class="button" title="{% if S_IS_LOCKED %}{{ lang('FORUM_LOCKED') }}{% else %}{{ lang('POST_TOPIC') }}{% endif %}">
         {% if S_IS_LOCKED %}
         <span>{{ lang('BUTTON_FORUM_LOCKED') }}</span> <i class="icon fa-lock fa-fw" aria-hidden="true"></i>
         {% else %}
@@ -47,7 +49,7 @@
                 <button class="button button-search" type="submit" title="{{ lang('SEARCH') }}">
                     <i class="icon fa-search fa-fw" aria-hidden="true"></i><span class="sr-only">{{ lang('SEARCH') }}</span>
                 </button>
-                <a href="{U_SEARCH}" class="button button-search-end" title="{{ lang('SEARCH_ADV') }}">
+                <a href="{{ U_SEARCH }}" class="button button-search-end" title="{{ lang('SEARCH_ADV') }}">
                     <i class="icon fa-cog fa-fw" aria-hidden="true"></i><span class="sr-only">{{ lang('SEARCH_ADV') }}</span>
                 </a>
                 {{ S_SEARCH_LOCAL_HIDDEN_FIELDS }}
@@ -96,13 +98,14 @@
                         <dt><label for="password">{{ lang('PASSWORD') ~ lang('COLON') }}</label></dt>
                         <dd><input type="password" tabindex="2" id="password" name="password" size="25" class="inputbox autowidth" autocomplete="off"></dd>
                         {% if S_AUTOLOGIN_ENABLED %}<dd><label for="autologin"><input type="checkbox" name="autologin" id="autologin" tabindex="3"> {{ lang('LOG_ME_IN') }}</label></dd>{% endif %}
-                        <dd><label for="viewonline"><input type="checkbox" name="viewonline" id="viewonline" tabindex="4" /> {{ lang('HIDE_ME') }}</label></dd>
+                        <dd><label for="viewonline"><input type="checkbox" name="viewonline" id="viewonline" tabindex="4"> {{ lang('HIDE_ME') }}</label></dd>
                     </dl>
                     <dl>
                         <dt>&nbsp;</dt>
                         <dd><input type="submit" name="login" tabindex="5" value="{{ lang('LOGIN') }}" class="button1"></dd>
                     </dl>
                     {{ S_LOGIN_REDIRECT }}
+					{{ S_FORM_TOKEN_LOGIN }}
                 </fieldset>
             </div>
 
@@ -154,10 +157,10 @@
                             <i class="icon fa-file fa-fw icon-red icon-md" aria-hidden="true"></i><span class="sr-only">{{ NEW_POST }}</span>
                         </a>
                         {% endif %}
-                        <a href="{{ topicrow.U_VIEW_TOPIC }}" class="topictitle">{{ topicrow.TOPIC_TITLE }}</a>
+                        {% if topicrow.U_VIEW_TOPIC %}<a href="{{ topicrow.U_VIEW_TOPIC }}" class="topictitle">{{ topicrow.TOPIC_TITLE }}</a>{% else %}{{ topicrow.topic_TITLE }}{% endif %}
                         {% if topicrow.S_TOPIC_UNAPPROVED or topicrow.S_POSTS_UNAPPROVED %}
-                        <a href="{{ topicrow.U_MCP_QUEUE }}" title="{{ lang('TOPIC_UNAPPROVED') }}">
-                            <i class="icon fa-question fa-fw icon-blue" aria-hidden="true"></i><span class="sr-only">{{ lang('TOPIC_UNAPPROVED') }}</span>
+                        <a href="{{ topicrow.U_MCP_QUEUE }}" title="{% if topicrow.S_TOPIC_UNAPPROVED %}{{ lang('TOPIC_UNAPPROVED') }}{% else %}{{ lang('POSTS_UNAPPROVED') }}{% endif %}">
+                            <i class="icon fa-question fa-fw icon-blue" aria-hidden="true"></i><span class="sr-only">{% if topicrow.S_TOPIC_UNAPPROVED %}{{ lang('TOPIC_UNAPPROVED') }}{% else %}{{ lang('POSTS_UNAPPROVED') }}{% endif %}</span>
                         </a>
                         {% endif %}
                         {% if topicrow.S_TOPIC_DELETED %}
@@ -175,16 +178,20 @@
 
                         {% if not S_IS_BOT %}
                         <div class="responsive-show" style="display: none;">
-                            {{ lang('LAST_POST') }} {{ lang('POST_BY_AUTHOR') }} {{ topicrow.LAST_POST_AUTHOR_FULL }} &laquo; <a href="{{ topicrow.U_LAST_POST }}" title="{{ lang('GOTO_LAST_POST') }}">{{ topicrow.LAST_POST_TIME }}</a>
+                            {{ lang('LAST_POST') }} {% EVENT viewforum_body_last_post_author_username_prepend %}{{ lang('POST_BY_AUTHOR') }} {{ topicrow.LAST_POST_AUTHOR_FULL }}{% EVENT viewforum_body_last_post_author_username_append %} &laquo; <a href="{{ topicrow.U_LAST_POST }}" title="{{ lang('GOTO_LAST_POST') }}"><time datetime="{{ topicrow.LAST_POST_TIME_RFC3339 }}">{{ topicrow.LAST_POST_TIME }}</time></a>
                             {% if topicrow.S_POST_GLOBAL and FORUM_ID != topicrow.FORUM_ID %}<br>{{ lang('POSTED') }} {{ lang('IN') }} <a href="{{ topicrow.U_VIEW_FORUM }}">{{ topicrow.FORUM_NAME }}</a>{% endif %}
                         </div>
-                        {% if topicrow.REPLIES %}<span class="responsive-show left-box" style="display: none;">{{ lang('REPLIES') ~ lang('COLON') }} <strong>{{ topicrow.REPLIES }}</strong></span>{% endif %}
+                        	{% if topicrow.REPLIES %}
+							<span class="responsive-show left-box" style="display: none;">{{ lang('REPLIES') ~ lang('COLON') }} <strong>{{ topicrow.REPLIES }}</strong></span>
+							{% endif %}
                         {% endif %}
 
                         <div class="topic-poster responsive-hide left-box">
                             {% if topicrow.S_HAS_POLL %}<i class="icon fa-bar-chart fa-fw" aria-hidden="true"></i>{% endif %}
                             {% if topicrow.ATTACH_ICON_IMG %}<i class="icon fa-paperclip fa-fw" aria-hidden="true"></i>{% endif %}
-                            {{ lang('POST_BY_AUTHOR') }} {{ topicrow.TOPIC_AUTHOR_FULL }} &raquo; {{ topicrow.FIRST_POST_TIME }}
+							{% EVENT topiclist_row_topic_by_author_before %}
+                            {{ lang('POST_BY_AUTHOR') }} {% EVENT viewforum_body_topic_author_username_prepend %}{{ topicrow.TOPIC_AUTHOR_FULL }}{% EVENT viewforum_body_topic_author_username_append %} &raquo; <time datetime="{{ topicrow.FIRST_POST_TIME_RFC3339 }}">{{ topicrow.FIRST_POST_TIME }}</time>
+							{% EVENT topiclist_row_topic_by_author_after %}
                             {% if topicrow.S_POST_GLOBAL and FORUM_ID != topicrow.FORUM_ID %} &raquo; {{ lang('IN') }} <a href="{{ topicrow.U_VIEW_FORUM }}">{{ topicrow.FORUM_NAME }}</a>{% endif %}
                         </div>
 
@@ -210,13 +217,13 @@
                     <dd class="posts">{{ topicrow.REPLIES }} <dfn>{{ lang('REPLIES') }}</dfn></dd>
                     <dd class="views">{{ topicrow.VIEWS }} <dfn>{{ lang('VIEWS') }}</dfn></dd>
                     <dd class="lastpost">
-                       <span><dfn>{{ lang('LAST_POST') }} </dfn>{{ lang('POST_BY_AUTHOR') }} {{ topicrow.LAST_POST_AUTHOR_FULL }}
-                                {% if not S_IS_BOT %}
+                       <span><dfn>{{ lang('LAST_POST') }} </dfn>{{ lang('POST_BY_AUTHOR') }} {% EVENT viewforum_body_last_post_author_username_prepend %}{{ topicrow.LAST_POST_AUTHOR_FULL }}{% EVENT viewforum_body_last_post_author_username_append %}
+                          {% if not S_IS_BOT and topicrow.U_LAST_POST %}
                              <a href="{topicrow.U_LAST_POST}" title="{{ lang('GOTO_LAST_POST') }}">
                                 <i class="icon fa-external-link-square fa-fw icon-lightgray icon-md" aria-hidden="true"></i><span class="sr-only">{{ VIEW_LATEST_POST }}</span>
                              </a>
-                                {% endif %}
-                          <br>{topicrow.LAST_POST_TIME}
+                          {% endif %}
+                          <br><time datetime="{{ topicrow.LAST_POST_TIME_RFC3339 }}">{{ topicrow.LAST_POST_TIME}}</time>
                        </span>
                     </dd>
                 </dl>
@@ -224,7 +231,7 @@
             </li>
             {% EVENT viewforum_body_topic_row_after %}
 
-            {% if topicrow.S_LAST_ROW %}
+{% if topicrow.S_LAST_ROW %}
         </ul>
     </div>
 </div>
@@ -236,6 +243,12 @@
     <div class="inner">
         <strong>{{ lang('NO_TOPICS') }}</strong>
     </div>
+</div>
+{% elseif not S_HAS_SUBFORUM %}
+<div class="panel">
+	<div class="inner">
+		<strong>{{ lang('NO_FORUMS_IN_CATEGORY') }}</strong>
+	</div>
 </div>
 {% endif %}
 {% endfor %}
@@ -274,9 +287,9 @@
 </div>
 {% endif %}
 
-{% if S_DISPLAY_ONLINE_LIST %}
+{% if S_DISPLAY_ONLINE_LIST and U_VIEWONLINE %}
 <div class="stat-block online-list">
-    <h3>{% if U_VIEWONLINE %}<a href="{{ U_VIEWONLINE }}">{{ lang('WHO_IS_ONLINE') }}</a>{% else %}{{ lang('WHO_IS_ONLINE') }}{% endif %}</h3>
+    <h3><a href="{{ U_VIEWONLINE }}">{{ lang('WHO_IS_ONLINE') }}</a></h3>
     <p>{{ LOGGED_IN_USER_LIST }}</p>
 </div>
 {% endif %}

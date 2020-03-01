@@ -8,7 +8,6 @@
 
 namespace davidiq\phpbbasic\event;
 
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -43,9 +42,6 @@ class listener implements EventSubscriberInterface
     /** @var \phpbb\request\request request */
     protected $request;
 
-    /** @var Containerinterface */
-    protected $phpbb_container;
-
     /** @var \phpbb\db\driver\driver_interface */
     protected $db;
 
@@ -58,26 +54,38 @@ class listener implements EventSubscriberInterface
     /** @var \phpbb\path_helper */
     protected $path_helper;
 
+    /** @var \phpbb\pagination */
+    protected $pagination;
+
+    /** @var \phpbb\content_visibility */
+    protected $phpbb_content_visibility;
+
+    /** @var \phpbb\cron\manager */
+    protected $cron;
+
     /**
      * Constructor
      *
      * @param \phpbb\config\config $config Config object
      * @param \phpbb\request\request $request Request object
-     * @param ContainerInterface $phpbb_container Interface container
+     * @param \phpbb\cron\manager $cron Cron job manager
      * @param \phpbb\db\driver\driver_interface $db dbal object
      * @param \phpbb\user $user User session object
      * @param \phpbb\auth\auth $auth Auth provider
      * @param \phpbb\template\template $template Template engine
      * @param \phpbb\cache\service $cache Caching object
      * @param \phpbb\event\dispatcher $phpbb_dispatcher Event dispatcher
+     * @param \phpbb\path_helper $path_helper Path helper
+     * @param \phpbb\pagination $pagination Pagination class
+     * @param \phpbb\content_visibility $phpbb_content_visibility Content visibility check
      * @param string $phpbb_root_path Current phpBB root path
      * @param string $php_ext phpEx
      */
-    public function __construct(\phpbb\config\config $config, \phpbb\request\request $request, ContainerInterface $phpbb_container, \phpbb\db\driver\driver_interface $db, \phpbb\user $user, \phpbb\auth\auth $auth, \phpbb\template\template $template, \phpbb\cache\service $cache, \phpbb\event\dispatcher $phpbb_dispatcher, \phpbb\path_helper $path_helper, $phpbb_root_path, $php_ext)
+    public function __construct(\phpbb\config\config $config, \phpbb\request\request $request, \phpbb\cron\manager $cron, \phpbb\db\driver\driver_interface $db, \phpbb\user $user, \phpbb\auth\auth $auth, \phpbb\template\template $template, \phpbb\cache\service $cache, \phpbb\event\dispatcher $phpbb_dispatcher, \phpbb\path_helper $path_helper, \phpbb\pagination $pagination, \phpbb\content_visibility $phpbb_content_visibility, $phpbb_root_path, $php_ext)
     {
         $this->config = $config;
         $this->request = $request;
-        $this->phpbb_container = $phpbb_container;
+        $this->cron = $cron;
         $this->db = $db;
         $this->phpbb_root_path = $phpbb_root_path;
         $this->php_ext = $php_ext;
@@ -87,6 +95,8 @@ class listener implements EventSubscriberInterface
         $this->cache = $cache;
         $this->path_helper = $path_helper;
         $this->phpbb_dispatcher = $phpbb_dispatcher;
+        $this->pagination = $pagination;
+        $this->phpbb_content_visibility = $phpbb_content_visibility;
         $this->phpbbasic_forumid = (int)$this->config['phpbbasic_forumid'];
         $this->phpbbasic_enabled = $this->phpbbasic_forumid > 0;
     }
@@ -161,9 +171,6 @@ class listener implements EventSubscriberInterface
         $sort_key = $this->request->variable('sk', $default_sort_key);
         $sort_dir = $this->request->variable('sd', $default_sort_dir);
 
-        /* @var $pagination \phpbb\pagination */
-        $pagination = $this->phpbb_container->get('pagination');
-
         // Check if the user has actually sent a forum ID with his/her request
         // If not give them a nice error page.
         if (!$forum_id)
@@ -206,11 +213,11 @@ class listener implements EventSubscriberInterface
         // Redirect to login upon emailed notification links
         if (isset($_GET['e']) && !$this->user->data['is_registered'])
         {
-            login_box('', $this->user->lang['LOGIN_NOTIFY_FORUM']);
+            login_box('', $this->user->lang('LOGIN_NOTIFY_FORUM'));
         }
 
         // Permissions check
-        if (!$this->auth->acl_gets('f_list', 'f_read', $forum_id) || ($forum_data['forum_type'] == FORUM_LINK && $forum_data['forum_link'] && !$this->auth->acl_get('f_read', $forum_id)))
+        if (!$this->auth->acl_gets('f_list', 'f_list_topics', 'f_read', $forum_id) || ($forum_data['forum_type'] == FORUM_LINK && $forum_data['forum_link'] && !$this->auth->acl_get('f_read', $forum_id)))
         {
             if ($this->user->data['user_id'] != ANONYMOUS)
             {
@@ -218,7 +225,7 @@ class listener implements EventSubscriberInterface
                 trigger_error('SORRY_AUTH_READ');
             }
 
-            login_box('', $this->user->lang['LOGIN_VIEWFORUM']);
+            login_box('', $this->user->lang('LOGIN_VIEWFORUM'));
         }
 
         // Forum is passworded ... check whether access has been granted to this
@@ -267,16 +274,41 @@ class listener implements EventSubscriberInterface
             }
         }
 
-        /* @var $phpbb_content_visibility \phpbb\content_visibility */
-        $phpbb_content_visibility = $this->phpbb_container->get('content.visibility');
+        // Is a forum specific topic count required?
+        if ($forum_data['forum_topics_per_page'])
+        {
+            $this->config['topics_per_page'] = $forum_data['forum_topics_per_page'];
+        }
 
         // Dump out the page header and load viewforum template
-        $topics_count = $phpbb_content_visibility->get_count('forum_topics', $forum_data, $forum_id);
-        $start = $pagination->validate_start($start, $this->config['topics_per_page'], $topics_count);
+        $topics_count = $this->phpbb_content_visibility->get_count('forum_topics', $forum_data, $forum_id);
+        $start = $this->pagination->validate_start($start, $this->config['topics_per_page'], $topics_count);
 
+        $page_title = $forum_data['forum_name'] . ($start ? ' - ' . $this->user->lang('PAGE_TITLE_NUMBER', $this->pagination->get_on_page($this->config['topics_per_page'], $start)) : '');
+
+        /**
+        * You can use this event to modify the page title of the viewforum page
+        *
+        * @event core.viewforum_modify_page_title
+        * @var	string	page_title		Title of the viewforum page
+        * @var	array	forum_data		Array with forum data
+        * @var	int		forum_id		The forum ID
+        * @var	int		start			Start offset used to calculate the page
+        * @since 3.2.2-RC1
+        */
+        $vars = array('page_title', 'forum_data', 'forum_id', 'start');
+        extract($this->phpbb_dispatcher->trigger_event('core.viewforum_modify_page_title', compact($vars)));
+
+        page_header($page_title, true, $forum_id);
         $this->template->set_filenames(array(
-                'body' => 'viewforum_body.html')
+            'body' => 'viewforum_body.html')
         );
+
+        make_jumpbox(append_sid("{$this->phpbb_root_path}index.$this->php_ext"), $forum_id);
+
+        $this->template->assign_vars(array(
+            'U_VIEW_FORUM'			=> append_sid("{$this->phpbb_root_path}index.$this->php_ext", "f=$forum_id" . (($start == 0) ? '' : "&amp;start=$start")),
+        ));
 
         // Not postable forum or showing active topics?
         if (!($forum_data['forum_type'] == FORUM_POST || (($forum_data['forum_flags'] & FORUM_FLAG_ACTIVE_TOPICS) && $forum_data['forum_type'] == FORUM_CAT)))
@@ -286,7 +318,7 @@ class listener implements EventSubscriberInterface
 
         // Ok, if someone has only list-access, we only display the forum list.
         // We also make this circumstance available to the template in case we want to display a notice. ;)
-        if (!$this->auth->acl_get('f_read', $forum_id))
+        if (!$this->auth->acl_gets('f_read', 'f_list_topics', $forum_id))
         {
             $this->template->assign_vars(array(
                 'S_NO_READ_ACCESS' => true,
@@ -310,32 +342,23 @@ class listener implements EventSubscriberInterface
             {
                 // Tell the ajax script what language vars and URL need to be replaced
                 $data = array(
-                    'NO_UNREAD_POSTS' => $this->user->lang['NO_UNREAD_POSTS'],
-                    'UNREAD_POSTS'    => $this->user->lang['UNREAD_POSTS'],
+                    'NO_UNREAD_POSTS' => $this->user->lang('NO_UNREAD_POSTS'),
+                    'UNREAD_POSTS'    => $this->user->lang('UNREAD_POSTS'),
                     'U_MARK_TOPICS'   => ($this->user->data['is_registered'] || $this->config['load_anon_lastread']) ? append_sid("{$this->phpbb_root_path}index.{$this->php_ext}", 'hash=' . generate_link_hash('global') . "&f=$forum_id&mark=topics&mark_time=" . time()) : '',
-                    'MESSAGE_TITLE'   => $this->user->lang['INFORMATION'],
-                    'MESSAGE_TEXT'    => $this->user->lang['TOPICS_MARKED']
+                    'MESSAGE_TITLE'   => $this->user->lang('INFORMATION'),
+                    'MESSAGE_TEXT'    => $this->user->lang('TOPICS_MARKED')
                 );
                 $json_response = new \phpbb\json_response();
                 $json_response->send($data);
             }
 
-            trigger_error($this->user->lang['TOPICS_MARKED'] . '<br /><br />' . sprintf($this->user->lang['RETURN_FORUM'], '<a href="' . $redirect_url . '">', '</a>'));
-        }
-
-        // Is a forum specific topic count required?
-        if ($forum_data['forum_topics_per_page'])
-        {
-            $this->config['topics_per_page'] = $forum_data['forum_topics_per_page'];
+            trigger_error($this->user->lang('TOPICS_MARKED') . '<br><br>' . sprintf($this->user->lang('RETURN_FORUM'), '<a href="' . $redirect_url . '">', '</a>'));
         }
 
         // Do the forum Prune thang - cron type job ...
         if (!$this->config['use_system_cron'])
         {
-            /* @var $cron \phpbb\cron\manager */
-            $cron = $this->phpbb_container->get('cron.manager');
-
-            $task = $cron->find_task('cron.task.core.prune_forum');
+            $task = $this->cron->find_task('cron.task.core.prune_forum');
             $task->set_forum_data($forum_data);
 
             if ($task->is_ready())
@@ -346,7 +369,7 @@ class listener implements EventSubscriberInterface
             else
             {
                 // See if we should prune the shadow topics instead
-                $task = $cron->find_task('cron.task.core.prune_shadow_topics');
+                $task = $this->cron->find_task('cron.task.core.prune_shadow_topics');
                 $task->set_forum_data($forum_data);
 
                 if ($task->is_ready())
@@ -376,10 +399,24 @@ class listener implements EventSubscriberInterface
         gen_forum_auth_level('forum', $forum_id, $forum_data['forum_status']);
 
         // Topic ordering options
-        $limit_days = array(0 => $this->user->lang['ALL_TOPICS'], 1 => $this->user->lang['1_DAY'], 7 => $this->user->lang['7_DAYS'], 14 => $this->user->lang['2_WEEKS'], 30 => $this->user->lang['1_MONTH'], 90 => $this->user->lang['3_MONTHS'], 180 => $this->user->lang['6_MONTHS'], 365 => $this->user->lang['1_YEAR']);
+        $limit_days = array(0 => $this->user->lang('ALL_TOPICS'), 1 => $this->user->lang('1_DAY'), 7 => $this->user->lang('7_DAYS'), 14 => $this->user->lang('2_WEEKS'), 30 => $this->user->lang('1_MONTH'), 90 => $this->user->lang('3_MONTHS'), 180 => $this->user->lang('6_MONTHS'), 365 => $this->user->lang('1_YEAR'));
 
-        $sort_by_text = array('a' => $this->user->lang['AUTHOR'], 't' => $this->user->lang['POST_TIME'], 'r' => $this->user->lang['REPLIES'], 's' => $this->user->lang['SUBJECT'], 'v' => $this->user->lang['VIEWS']);
+        $sort_by_text = array('a' => $this->user->lang('AUTHOR'), 't' => $this->user->lang('POST_TIME'), 'r' => $this->user->lang('REPLIES'), 's' => $this->user->lang('SUBJECT'), 'v' => $this->user->lang('VIEWS'));
         $sort_by_sql = array('a' => 't.topic_first_poster_name', 't' => array('t.topic_last_post_time', 't.topic_last_post_id'), 'r' => (($this->auth->acl_get('m_approve', $forum_id)) ? 't.topic_posts_approved + t.topic_posts_unapproved + t.topic_posts_softdeleted' : 't.topic_posts_approved'), 's' => 'LOWER(t.topic_title)', 'v' => 't.topic_views');
+
+        /**
+         * Modify the topic ordering if needed
+         *
+         * @event core.viewforum_modify_topic_ordering
+         * @var array	sort_by_text	Topic ordering options
+         * @var array	sort_by_sql		Topic orderings options SQL equivalent
+         * @since 3.2.5-RC1
+         */
+        $vars = array(
+            'sort_by_text',
+            'sort_by_sql',
+        );
+        extract($this->phpbb_dispatcher->trigger_event('core.viewforum_modify_topic_ordering', compact($vars)));
 
         $s_limit_days = $s_sort_key = $s_sort_dir = $u_sort_param = '';
         gen_sort_selects($limit_days, $sort_by_text, $sort_days, $sort_key, $sort_dir, $s_limit_days, $s_sort_key, $s_sort_dir, $u_sort_param, $default_sort_days, $default_sort_key, $default_sort_dir);
@@ -398,7 +435,7 @@ class listener implements EventSubscriberInterface
 			AND (t.topic_last_post_time >= ' . $min_post_time . '
 				OR t.topic_type = ' . POST_ANNOUNCE . '
 				OR t.topic_type = ' . POST_GLOBAL . ')
-			AND ' . $phpbb_content_visibility->get_visibility_sql('topic', $forum_id, 't.'),
+			AND ' . $this->phpbb_content_visibility->get_visibility_sql('topic', $forum_id, 't.'),
             );
 
             /**
@@ -443,7 +480,7 @@ class listener implements EventSubscriberInterface
         }
 
         // Basic pagewide vars
-        $post_alt = ($forum_data['forum_status'] == ITEM_LOCKED) ? $this->user->lang['FORUM_LOCKED'] : $this->user->lang['POST_NEW_TOPIC'];
+        $post_alt = ($forum_data['forum_status'] == ITEM_LOCKED) ? $this->user->lang('FORUM_LOCKED') : $this->user->lang('POST_NEW_TOPIC');
 
         // Display active topics?
         $s_display_active = ($forum_data['forum_type'] == FORUM_CAT && ($forum_data['forum_flags'] & FORUM_FLAG_ACTIVE_TOPICS)) ? true : false;
@@ -465,7 +502,7 @@ class listener implements EventSubscriberInterface
         }
 
         $this->template->assign_vars(array(
-            'MODERATORS' => (!empty($moderators[$forum_id])) ? implode($this->user->lang['COMMA_SEPARATOR'], $moderators[$forum_id]) : '',
+            'MODERATORS' => (!empty($moderators[$forum_id])) ? implode($this->user->lang('COMMA_SEPARATOR'), $moderators[$forum_id]) : '',
 
             'POST_IMG'                   => ($forum_data['forum_status'] == ITEM_LOCKED) ? $this->user->img('button_topic_locked', $post_alt) : $this->user->img('button_topic_new', $post_alt),
             'NEWEST_POST_IMG'            => $this->user->img('icon_topic_newest', 'VIEW_NEWEST_POST'),
@@ -487,7 +524,7 @@ class listener implements EventSubscriberInterface
             'POLL_IMG'                   => $this->user->img('icon_topic_poll', 'TOPIC_POLL'),
             'GOTO_PAGE_IMG'              => $this->user->img('icon_post_target', 'GOTO_PAGE'),
 
-            'L_NO_TOPICS' => ($forum_data['forum_status'] == ITEM_LOCKED) ? $this->user->lang['POST_FORUM_LOCKED'] : $this->user->lang['NO_TOPICS'],
+            'L_NO_TOPICS' => ($forum_data['forum_status'] == ITEM_LOCKED) ? $this->user->lang('POST_FORUM_LOCKED') : $this->user->lang('NO_TOPICS'),
 
             'S_DISPLAY_POST_INFO' => ($forum_data['forum_type'] == FORUM_POST && ($this->auth->acl_get('f_post', $forum_id) || $this->user->data['user_id'] == ANONYMOUS)) ? true : false,
 
@@ -507,7 +544,7 @@ class listener implements EventSubscriberInterface
             'S_DISPLAY_SEARCHBOX'          => ($this->auth->acl_get('u_search') && $this->auth->acl_get('f_search', $forum_id) && $this->config['load_search']) ? true : false,
             'S_SEARCHBOX_ACTION'           => append_sid("{$this->phpbb_root_path}search.{$this->php_ext}"),
             'S_SEARCH_LOCAL_HIDDEN_FIELDS' => build_hidden_fields($s_search_hidden_fields),
-            'S_SINGLE_MODERATOR'           => (!empty($moderators[$forum_id]) && sizeof($moderators[$forum_id]) > 1) ? false : true,
+            'S_SINGLE_MODERATOR'           => (!empty($moderators[$forum_id]) && count($moderators[$forum_id]) > 1) ? false : true,
             'S_IS_LOCKED'                  => ($forum_data['forum_status'] == ITEM_LOCKED) ? true : false,
             'S_PHPBBASIC_ENABLED'          => true,
 
@@ -548,9 +585,9 @@ class listener implements EventSubscriberInterface
          *                                    Author, Post time, Replies, Subject, Views
          * @var    string    sort_dir            Either "a" for ascending or "d" for descending
          * @since 3.1.0-a1
-         * @change 3.1.0-RC4 Added forum_data var
-         * @change 3.1.4-RC1 Added forum_id, topics_count, sort_days, sort_key and sort_dir vars
-         * @change 3.1.9-RC1 Fix types of properties
+         * @changed 3.1.0-RC4 Added forum_data var
+         * @changed 3.1.4-RC1 Added forum_id, topics_count, sort_days, sort_key and sort_dir vars
+         * @changed 3.1.9-RC1 Fix types of properties
          */
         $vars = array(
             'forum_data',
@@ -563,7 +600,7 @@ class listener implements EventSubscriberInterface
         );
         extract($this->phpbb_dispatcher->trigger_event('core.viewforum_get_topic_data', compact($vars)));
 
-        $sql_approved = ' AND ' . $phpbb_content_visibility->get_visibility_sql('topic', $forum_id, 't.');
+        $sql_approved = ' AND ' . $this->phpbb_content_visibility->get_visibility_sql('topic', $forum_id, 't.');
 
         if ($this->user->data['is_registered'])
         {
@@ -578,7 +615,7 @@ class listener implements EventSubscriberInterface
                 $sql_array['LEFT_JOIN'][] = array('FROM' => array(TOPICS_TRACK_TABLE => 'tt'), 'ON' => 'tt.topic_id = t.topic_id AND tt.user_id = ' . $this->user->data['user_id']);
                 $sql_array['SELECT'] .= ', tt.mark_time';
 
-                if ($s_display_active && sizeof($active_forum_ary))
+                if ($s_display_active && count($active_forum_ary))
                 {
                     $sql_array['LEFT_JOIN'][] = array('FROM' => array(FORUMS_TRACK_TABLE => 'ft'), 'ON' => 'ft.forum_id = t.forum_id AND ft.user_id = ' . $this->user->data['user_id']);
                     $sql_array['SELECT'] .= ', ft.mark_time AS forum_mark_time';
@@ -604,7 +641,7 @@ class listener implements EventSubscriberInterface
 
                 'WHERE' => '(t.forum_id = ' . $forum_id . '
 				AND t.topic_type = ' . POST_ANNOUNCE . ') OR
-			(' . $this->db->sql_in_set('t.forum_id', $g_forum_ary) . '
+			(' . $this->db->sql_in_set('t.forum_id', $g_forum_ary, false, true) . '
 				AND t.topic_type = ' . POST_GLOBAL . ')',
 
                 'ORDER_BY' => 't.topic_time DESC',
@@ -636,7 +673,7 @@ class listener implements EventSubscriberInterface
 
             while ($row = $this->db->sql_fetchrow($result))
             {
-                if ($row['topic_visibility'] != ITEM_APPROVED && !$this->auth->acl_get('m_approve', $row['forum_id']))
+                if (!$this->phpbb_content_visibility->is_visible('topic', $row['forum_id'], $row))
                 {
                     // Do not display announcements that are waiting for approval or soft deleted.
                     continue;
@@ -686,8 +723,8 @@ class listener implements EventSubscriberInterface
             // Select the sort order
             $direction = (($sort_dir == 'd') ? 'ASC' : 'DESC');
 
-            $sql_limit = $pagination->reverse_limit($start, $sql_limit, $topics_count - sizeof($announcement_list));
-            $sql_start = $pagination->reverse_start($start, $sql_limit, $topics_count - sizeof($announcement_list));
+            $sql_limit = $this->pagination->reverse_limit($start, $sql_limit, $topics_count - count($announcement_list));
+            $sql_start = $this->pagination->reverse_start($start, $sql_limit, $topics_count - count($announcement_list));
         }
         else
         {
@@ -695,6 +732,18 @@ class listener implements EventSubscriberInterface
             $direction = (($sort_dir == 'd') ? 'DESC' : 'ASC');
             $sql_start = $start;
         }
+
+        /**
+         * Modify the topics sort ordering if needed
+         *
+         * @event core.viewforum_modify_sort_direction
+         * @var string	direction	Topics sort order
+         * @since 3.2.5-RC1
+         */
+        $vars = array(
+            'direction',
+        );
+        extract($this->phpbb_dispatcher->trigger_event('core.viewforum_modify_sort_direction', compact($vars)));
 
         if (is_array($sort_by_sql[$sort_key]))
         {
@@ -705,7 +754,7 @@ class listener implements EventSubscriberInterface
             $sql_sort_order = $sort_by_sql[$sort_key] . ' ' . $direction;
         }
 
-        if ($forum_data['forum_type'] == FORUM_POST || !sizeof($active_forum_ary))
+        if ($forum_data['forum_type'] == FORUM_POST || !count($active_forum_ary))
         {
             $sql_where = 't.forum_id = ' . $forum_id;
         }
@@ -775,7 +824,7 @@ class listener implements EventSubscriberInterface
         // For storing shadow topics
         $shadow_topic_list = array();
 
-        if (sizeof($topic_list))
+        if (count($topic_list))
         {
             // SQL array for obtaining topics/stickies
             $sql_array = array(
@@ -805,7 +854,7 @@ class listener implements EventSubscriberInterface
         }
 
         // If we have some shadow topics, update the rowset to reflect their topic information
-        if (sizeof($shadow_topic_list))
+        if (count($shadow_topic_list))
         {
             // SQL array for obtaining shadow topics
             $sql_array = array(
@@ -880,10 +929,10 @@ class listener implements EventSubscriberInterface
 
         // We need to remove the global announcements from the forums total topic count,
         // otherwise the number is different from the one on the forum list
-        $total_topic_count = $topics_count - sizeof($announcement_list);
+        $total_topic_count = $topics_count - count($announcement_list);
 
         $base_url = append_sid("{$this->phpbb_root_path}index.{$this->php_ext}", "f=$forum_id" . ((strlen($u_sort_param)) ? "&amp;$u_sort_param" : ''));
-        $pagination->generate_template_pagination($base_url, 'pagination', 'start', $total_topic_count, $this->config['topics_per_page'], $start);
+        $this->pagination->generate_template_pagination($base_url, 'pagination', 'start', $total_topic_count, $this->config['topics_per_page'], $start);
 
         $this->template->assign_vars(array(
             'TOTAL_TOPICS' => ($s_display_active) ? false : $this->user->lang('VIEW_FORUM_TOPICS', (int)$total_topic_count),
@@ -898,14 +947,16 @@ class listener implements EventSubscriberInterface
          * @event core.viewforum_modify_topics_data
          * @var    array    topic_list            Array with current viewforum page topic ids
          * @var    array    rowset                Array with topics data (in topic_id => topic_data format)
-         * @var    int        total_topic_count    Forum's total topic count
+         * @var    int      total_topic_count    Forum's total topic count
+         * @var    int		forum_id			Forum identifier
          * @since 3.1.0-b3
+         * @changed 3.1.11-RC1 Added forum_id
          */
-        $vars = array('topic_list', 'rowset', 'total_topic_count');
+        $vars = array('topic_list', 'rowset', 'total_topic_count', 'forum_id');
         extract($this->phpbb_dispatcher->trigger_event('core.viewforum_modify_topics_data', compact($vars)));
 
         // Okay, lets dump out the page ...
-        if (sizeof($topic_list))
+        if (count($topic_list))
         {
             $mark_forum_read = true;
             $mark_time_forum = 0;
@@ -968,7 +1019,7 @@ class listener implements EventSubscriberInterface
                 $s_type_switch_test = ($row['topic_type'] == POST_ANNOUNCE || $row['topic_type'] == POST_GLOBAL) ? 1 : 0;
 
                 // Replies
-                $replies = $phpbb_content_visibility->get_count('topic_posts', $row, $topic_forum_id) - 1;
+                $replies = $this->phpbb_content_visibility->get_count('topic_posts', $row, $topic_forum_id) - 1;
 
                 if ($row['topic_status'] == ITEM_MOVED)
                 {
@@ -986,7 +1037,7 @@ class listener implements EventSubscriberInterface
 
                 // Generate all the URIs ...
                 $view_topic_url_params = 'f=' . $row['forum_id'] . '&amp;t=' . $topic_id;
-                $view_topic_url = append_sid("{$this->phpbb_root_path}viewtopic.{$this->php_ext}", $view_topic_url_params);
+                $view_topic_url = $this->auth->acl_get('f_read', $forum_id) ? append_sid("{$this->phpbb_root_path}viewtopic.{$this->php_ext}", $view_topic_url_params) : false;
 
                 $topic_unapproved = (($row['topic_visibility'] == ITEM_UNAPPROVED || $row['topic_visibility'] == ITEM_REAPPROVE) && $this->auth->acl_get('m_approve', $row['forum_id']));
                 $posts_unapproved = ($row['topic_visibility'] == ITEM_APPROVED && $row['topic_posts_unapproved'] && $this->auth->acl_get('m_approve', $row['forum_id']));
@@ -1003,9 +1054,12 @@ class listener implements EventSubscriberInterface
                     'TOPIC_AUTHOR_COLOUR'     => get_username_string('colour', $row['topic_poster'], $row['topic_first_poster_name'], $row['topic_first_poster_colour']),
                     'TOPIC_AUTHOR_FULL'       => get_username_string('full', $row['topic_poster'], $row['topic_first_poster_name'], $row['topic_first_poster_colour']),
                     'FIRST_POST_TIME'         => $this->user->format_date($row['topic_time']),
+                    'FIRST_POST_TIME_RFC3339' => gmdate(DATE_RFC3339, $row['topic_time']),
                     'LAST_POST_SUBJECT'       => censor_text($row['topic_last_post_subject']),
                     'LAST_POST_TIME'          => $this->user->format_date($row['topic_last_post_time']),
+                    'LAST_POST_TIME_RFC3339'  => gmdate(DATE_RFC3339, $row['topic_last_post_time']),
                     'LAST_VIEW_TIME'          => $this->user->format_date($row['topic_last_view_time']),
+                    'LAST_VIEW_TIME_RFC3339'  => gmdate(DATE_RFC3339, $row['topic_last_view_time']),
                     'LAST_POST_AUTHOR'        => get_username_string('username', $row['topic_last_poster_id'], $row['topic_last_poster_name'], $row['topic_last_poster_colour']),
                     'LAST_POST_AUTHOR_COLOUR' => get_username_string('colour', $row['topic_last_poster_id'], $row['topic_last_poster_name'], $row['topic_last_poster_colour']),
                     'LAST_POST_AUTHOR_FULL'   => get_username_string('full', $row['topic_last_poster_id'], $row['topic_last_poster_name'], $row['topic_last_poster_colour']),
@@ -1018,12 +1072,12 @@ class listener implements EventSubscriberInterface
 
                     'TOPIC_IMG_STYLE'      => $folder_img,
                     'TOPIC_FOLDER_IMG'     => $this->user->img($folder_img, $folder_alt),
-                    'TOPIC_FOLDER_IMG_ALT' => $this->user->lang[$folder_alt],
+                    'TOPIC_FOLDER_IMG_ALT' => $this->user->lang($folder_alt),
 
                     'TOPIC_ICON_IMG'        => (!empty($icons[$row['icon_id']])) ? $icons[$row['icon_id']]['img'] : '',
                     'TOPIC_ICON_IMG_WIDTH'  => (!empty($icons[$row['icon_id']])) ? $icons[$row['icon_id']]['width'] : '',
                     'TOPIC_ICON_IMG_HEIGHT' => (!empty($icons[$row['icon_id']])) ? $icons[$row['icon_id']]['height'] : '',
-                    'ATTACH_ICON_IMG'       => ($this->auth->acl_get('u_download') && $this->auth->acl_get('f_download', $row['forum_id']) && $row['topic_attachment']) ? $this->user->img('icon_topic_attach', $this->user->lang['TOTAL_ATTACHMENTS']) : '',
+                    'ATTACH_ICON_IMG'       => ($this->auth->acl_get('u_download') && $this->auth->acl_get('f_download', $row['forum_id']) && $row['topic_attachment']) ? $this->user->img('icon_topic_attach', $this->user->lang('TOTAL_ATTACHMENTS')) : '',
                     'UNAPPROVED_IMG'        => ($topic_unapproved || $posts_unapproved) ? $this->user->img('icon_topic_unapproved', ($topic_unapproved) ? 'TOPIC_UNAPPROVED' : 'POSTS_UNAPPROVED') : '',
 
                     'S_TOPIC_TYPE'       => $row['topic_type'],
@@ -1040,11 +1094,12 @@ class listener implements EventSubscriberInterface
                     'S_TOPIC_LOCKED'     => ($row['topic_status'] == ITEM_LOCKED) ? true : false,
                     'S_TOPIC_MOVED'      => ($row['topic_status'] == ITEM_MOVED) ? true : false,
 
-                    'U_NEWEST_POST'      => append_sid("{$this->phpbb_root_path}viewtopic.{$this->php_ext}", $view_topic_url_params . '&amp;view=unread') . '#unread',
-                    'U_LAST_POST'        => append_sid("{$this->phpbb_root_path}viewtopic.{$this->php_ext}", $view_topic_url_params . '&amp;p=' . $row['topic_last_post_id']) . '#p' . $row['topic_last_post_id'],
+                    'U_NEWEST_POST'      => $this->auth->acl_get('f_read', $forum_id) ? append_sid("{$this->phpbb_root_path}viewtopic.{$this->php_ext}", $view_topic_url_params . '&amp;view=unread') . '#unread' : false,
+                    'U_LAST_POST'        => $this->auth->acl_get('f_read', $forum_id)  ? append_sid("{$this->phpbb_root_path}viewtopic.{$this->php_ext}", $view_topic_url_params . '&amp;p=' . $row['topic_last_post_id']) . '#p' . $row['topic_last_post_id'] : false,
                     'U_LAST_POST_AUTHOR' => get_username_string('profile', $row['topic_last_poster_id'], $row['topic_last_poster_name'], $row['topic_last_poster_colour']),
                     'U_TOPIC_AUTHOR'     => get_username_string('profile', $row['topic_poster'], $row['topic_first_poster_name'], $row['topic_first_poster_colour']),
                     'U_VIEW_TOPIC'       => $view_topic_url,
+                    'U_VIEW_FORUM'       => append_sid("{$this->phpbb_root_path}index.{$this->php_ext}", 'f=' . $row['forum_id']),
                     'U_MCP_REPORT'       => append_sid("{$this->phpbb_root_path}mcp.{$this->php_ext}", 'i=reports&amp;mode=reports&amp;f=' . $row['forum_id'] . '&amp;t=' . $topic_id, true, $this->user->session_id),
                     'U_MCP_QUEUE'        => $u_mcp_queue,
 
@@ -1068,7 +1123,7 @@ class listener implements EventSubscriberInterface
 
                 $this->template->assign_block_vars('topicrows', $topic_row);
 
-                $pagination->generate_template_pagination($view_topic_url, 'topicrows.pagination', 'start', $replies + 1, $this->config['posts_per_page'], 1, true, true);
+                $this->pagination->generate_template_pagination($view_topic_url, 'topicrows.pagination', 'start', $replies + 1, $this->config['posts_per_page'], 1, true, true);
 
                 $s_type_switch = ($row['topic_type'] == POST_ANNOUNCE || $row['topic_type'] == POST_GLOBAL) ? 1 : 0;
 
@@ -1103,11 +1158,21 @@ class listener implements EventSubscriberInterface
             }
         }
 
+        /**
+        * This event is to perform additional actions on viewforum page
+        *
+        * @event core.viewforum_generate_page_after
+        * @var	array	forum_data	Array with the forum data
+        * @since 3.2.2-RC1
+        */
+        $vars = array('forum_data');
+        extract($this->phpbb_dispatcher->trigger_event('core.viewforum_generate_page_after', compact($vars)));
+
         // This is rather a fudge but it's the best I can think of without requiring information
         // on all topics (as we do in 2.0.x). It looks for unread or new topics, if it doesn't find
         // any it updates the forum last read cookie. This requires that the user visit the forum
         // after reading a topic
-        if ($forum_data['forum_type'] == FORUM_POST && sizeof($topic_list) && $mark_forum_read)
+        if ($forum_data['forum_type'] == FORUM_POST && count($topic_list) && $mark_forum_read)
         {
             update_forum_tracking_info($forum_id, $forum_data['forum_last_post_time'], false, $mark_time_forum);
         }
