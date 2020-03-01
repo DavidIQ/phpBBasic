@@ -11,6 +11,7 @@ services:
             - '@template'
             - '@cache'
             - '@dispatcher'
+            - '@path_helper'
             - '%core.root_path%'
             - '%core.php_ext%'
         tags:

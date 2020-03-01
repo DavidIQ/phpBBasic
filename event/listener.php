@@ -55,6 +55,9 @@ class listener implements EventSubscriberInterface
     /** @var \phpbb\event\dispatcher */
     protected $phpbb_dispatcher;
 
+    /** @var \phpbb\path_helper */
+    protected $path_helper;
+
     /**
      * Constructor
      *
@@ -70,7 +73,7 @@ class listener implements EventSubscriberInterface
      * @param string $phpbb_root_path Current phpBB root path
      * @param string $php_ext phpEx
      */
-    public function __construct(\phpbb\config\config $config, \phpbb\request\request $request, ContainerInterface $phpbb_container, \phpbb\db\driver\driver_interface $db, \phpbb\user $user, \phpbb\auth\auth $auth, \phpbb\template\template $template, \phpbb\cache\service $cache, \phpbb\event\dispatcher $phpbb_dispatcher, $phpbb_root_path, $php_ext)
+    public function __construct(\phpbb\config\config $config, \phpbb\request\request $request, ContainerInterface $phpbb_container, \phpbb\db\driver\driver_interface $db, \phpbb\user $user, \phpbb\auth\auth $auth, \phpbb\template\template $template, \phpbb\cache\service $cache, \phpbb\event\dispatcher $phpbb_dispatcher, \phpbb\path_helper $path_helper, $phpbb_root_path, $php_ext)
     {
         $this->config = $config;
         $this->request = $request;
@@ -82,6 +85,7 @@ class listener implements EventSubscriberInterface
         $this->auth = $auth;
         $this->template = $template;
         $this->cache = $cache;
+        $this->path_helper = $path_helper;
         $this->phpbb_dispatcher = $phpbb_dispatcher;
         $this->phpbbasic_forumid = (int)$this->config['phpbbasic_forumid'];
         $this->phpbbasic_enabled = $this->phpbbasic_forumid > 0;
@@ -116,8 +120,7 @@ class listener implements EventSubscriberInterface
         {
             if ($this->user->page['page_name'] == 'viewforum.' . $this->php_ext)
             {
-                $path_helper = $this->phpbb_container->get('path_helper');
-                $url_parts = $path_helper->get_url_parts($this->user->page['page']);
+                $url_parts = $this->path_helper->get_url_parts($this->user->page['page']);
                 $querystring = array();
                 // Looking for the phpBBasic forum ID so we can remove it before redirecting
                 foreach ($url_parts['params'] as $key => $value)
@@ -134,6 +137,7 @@ class listener implements EventSubscriberInterface
 
     /**
      * Displays a single forum's topics on the index page as configured with phpBBasic
+     * Mostly a copy of viewforum.php
      *
      * @param object $event The event object
      */
@@ -338,7 +342,8 @@ class listener implements EventSubscriberInterface
             {
                 $url = $task->get_url();
                 $this->template->assign_var('RUN_CRON_TASK', '<img src="' . $url . '" width="1" height="1" alt="cron" />');
-            } else
+            }
+            else
             {
                 // See if we should prune the shadow topics instead
                 $task = $cron->find_task('cron.task.core.prune_shadow_topics');
@@ -431,7 +436,8 @@ class listener implements EventSubscriberInterface
 
             // Make sure we have information about day selection ready
             $this->template->assign_var('S_SORT_DAYS', true);
-        } else
+        }
+        else
         {
             $sql_limit_time = '';
         }
@@ -682,7 +688,8 @@ class listener implements EventSubscriberInterface
 
             $sql_limit = $pagination->reverse_limit($start, $sql_limit, $topics_count - sizeof($announcement_list));
             $sql_start = $pagination->reverse_start($start, $sql_limit, $topics_count - sizeof($announcement_list));
-        } else
+        }
+        else
         {
             // Select the sort order
             $direction = (($sort_dir == 'd') ? 'DESC' : 'ASC');
@@ -692,7 +699,8 @@ class listener implements EventSubscriberInterface
         if (is_array($sort_by_sql[$sort_key]))
         {
             $sql_sort_order = implode(' ' . $direction . ', ', $sort_by_sql[$sort_key]) . ' ' . $direction;
-        } else
+        }
+        else
         {
             $sql_sort_order = $sort_by_sql[$sort_key] . ' ' . $direction;
         }
@@ -700,10 +708,12 @@ class listener implements EventSubscriberInterface
         if ($forum_data['forum_type'] == FORUM_POST || !sizeof($active_forum_ary))
         {
             $sql_where = 't.forum_id = ' . $forum_id;
-        } else if (empty($active_forum_ary['exclude_forum_id']))
+        }
+        else if (empty($active_forum_ary['exclude_forum_id']))
         {
             $sql_where = $this->db->sql_in_set('t.forum_id', $active_forum_ary['forum_id']);
-        } else
+        }
+        else
         {
             $get_forum_ids = array_diff($active_forum_ary['forum_id'], $active_forum_ary['exclude_forum_id']);
             $sql_where = (sizeof($get_forum_ids)) ? $this->db->sql_in_set('t.forum_id', $get_forum_ids) : 't.forum_id = ' . $forum_id;
@@ -919,7 +929,8 @@ class listener implements EventSubscriberInterface
                 {
                     $topic_tracking_info += get_topic_tracking($f_id, $topic_row['topics'], $rowset, array($f_id => $topic_row['forum_mark_time']));
                 }
-            } else if ($this->config['load_anon_lastread'] || $this->user->data['is_registered'])
+            }
+            else if ($this->config['load_anon_lastread'] || $this->user->data['is_registered'])
             {
                 foreach ($topic_forum_list as $f_id => $topic_row)
                 {
@@ -934,7 +945,8 @@ class listener implements EventSubscriberInterface
                 if ($this->config['load_db_lastread'] && $this->user->data['is_registered'])
                 {
                     $mark_time_forum = (!empty($forum_data['mark_time'])) ? $forum_data['mark_time'] : $this->user->data['user_lastmark'];
-                } else if ($this->config['load_anon_lastread'] || $this->user->data['is_registered'])
+                }
+                else if ($this->config['load_anon_lastread'] || $this->user->data['is_registered'])
                 {
                     if (!$this->user->data['is_registered'])
                     {
@@ -962,7 +974,8 @@ class listener implements EventSubscriberInterface
                 {
                     $topic_id = $row['topic_moved_id'];
                     $unread_topic = false;
-                } else
+                }
+                else
                 {
                     $unread_topic = (isset($topic_tracking_info[$topic_id]) && $row['topic_last_post_time'] > $topic_tracking_info[$topic_id]) ? true : false;
                 }
