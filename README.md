@@ -1,6 +1,6 @@
-[![phpBBasic](http://phpbb.davidiq.com/download/file.php?id=153)](http://phpbb.davidiq.com/viewtopic.php?f=19&t=685)
+[phpBBasic](https://www.davidiq.com/support/viewtopic.php?f=19&t=685)
 
-# phpBBasic Extension for phpBB 3.2.x 
+# phpBBasic Extension for phpBB 3.2.x & 3.3.x
 phpBB Extension to add single forum setup to a phpBB installation, with all topics visible on the forum's index page.
 
 ## Installation
@@ -21,7 +21,7 @@ phpBB Extension to add single forum setup to a phpBB installation, with all topi
 ## Support
 
 * Report any bugs to the [Issue Tracker](https://github.com/DavidIQ/phpBBasic/issues).
-* Support requests should be posted and discussed in the [phpBBasic support area at phpBB.com](https://www.phpbb.com/customise/db/extension/phpbbasic/support) or on my [Support forum] (http://phpbb.davidiq.com).
+* Support requests should be posted and discussed in the [phpBBasic support area at phpBB.com](https://www.phpbb.com/customise/db/extension/phpbbasic/support) or on my [Support forum](https://www.davidiq.com/support).
 
 ## License
 [GNU General Public License v2](http://opensource.org/licenses/GPL-2.0)
