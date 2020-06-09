@@ -344,7 +344,7 @@ class listener implements EventSubscriberInterface
                 $data = array(
                     'NO_UNREAD_POSTS' => $this->user->lang('NO_UNREAD_POSTS'),
                     'UNREAD_POSTS'    => $this->user->lang('UNREAD_POSTS'),
-                    'U_MARK_TOPICS'   => ($this->user->data['is_registered'] || $this->config['load_anon_lastread']) ? append_sid("{$this->phpbb_root_path}index.{$this->php_ext}", 'hash=' . generate_link_hash('global') . "&f=$forum_id&mark=topics&mark_time=" . time()) : '',
+                    'U_MARK_TOPICS'   => ($this->user->data['is_registered'] || $this->config['load_anon_lastread']) ? append_sid("{$this->phpbb_root_path}index.{$this->php_ext}", 'hash=' . generate_link_hash('global') . "&amp;f=$forum_id&amp;mark=topics&amp;mark_time=" . time()) : '',
                     'MESSAGE_TITLE'   => $this->user->lang('INFORMATION'),
                     'MESSAGE_TEXT'    => $this->user->lang('TOPICS_MARKED')
                 );
