@@ -534,7 +534,7 @@ class listener implements EventSubscriberInterface
             'S_SELECT_SORT_DIR'            => $s_sort_dir,
             'S_SELECT_SORT_KEY'            => $s_sort_key,
             'S_SELECT_SORT_DAYS'           => $s_limit_days,
-            'S_TOPIC_ICONS'                => ($s_display_active && sizeof($active_forum_ary)) ? max($active_forum_ary['enable_icons']) : (($forum_data['enable_icons']) ? true : false),
+            'S_TOPIC_ICONS'                => ($s_display_active && count($active_forum_ary)) ? max($active_forum_ary['enable_icons']) : (($forum_data['enable_icons']) ? true : false),
             'U_WATCH_FORUM_LINK'           => $this->viewforum_swap($s_watching_forum['link']),
             'U_WATCH_FORUM_TOGGLE'         => $this->viewforum_swap($s_watching_forum['link_toggle']),
             'S_WATCH_FORUM_TITLE'          => $s_watching_forum['title'],
@@ -765,7 +765,7 @@ class listener implements EventSubscriberInterface
         else
         {
             $get_forum_ids = array_diff($active_forum_ary['forum_id'], $active_forum_ary['exclude_forum_id']);
-            $sql_where = (sizeof($get_forum_ids)) ? $this->db->sql_in_set('t.forum_id', $get_forum_ids) : 't.forum_id = ' . $forum_id;
+            $sql_where = (count($get_forum_ids)) ? $this->db->sql_in_set('t.forum_id', $get_forum_ids) : 't.forum_id = ' . $forum_id;
         }
 
         // Grab just the sorted topic ids
@@ -835,6 +835,26 @@ class listener implements EventSubscriberInterface
                 'WHERE' => $this->db->sql_in_set('t.topic_id', $topic_list),
             );
 
+            /**
+            * Event to modify the SQL query before obtaining topics/stickies
+            *
+            * @event core.viewforum_modify_topic_list_sql
+            * @var	int		forum_id			The forum ID
+            * @var	array	forum_data			Data about the forum
+            * @var	array	topic_list			Topic ids array
+            * @var	array	sql_array			SQL query array for obtaining topics/stickies
+            *
+            * @since 3.2.10-RC1
+            * @since 3.3.1-RC1
+            */
+            $vars = [
+                'forum_id',
+                'forum_data',
+                'topic_list',
+                'sql_array',
+            ];
+            extract($this->phpbb_dispatcher->trigger_event('core.viewforum_modify_topic_list_sql', compact($vars)));
+
             // If store_reverse, then first obtain topics, then stickies, else the other way around...
             // Funnily enough you typically save one query if going from the last page to the middle (store_reverse) because
             // the number of stickies are not known
@@ -894,7 +914,7 @@ class listener implements EventSubscriberInterface
                 }
 
                 // Do not include those topics the user has no permission to access
-                if (!$this->auth->acl_get('f_read', $row['forum_id']))
+                if (!$this->auth->acl_gets('f_read', 'f_list_topics', $row['forum_id']))
                 {
                     // We need to remove any trace regarding this topic. :)
                     unset($rowset[$orig_topic_id]);
@@ -1020,6 +1040,11 @@ class listener implements EventSubscriberInterface
 
                 // Replies
                 $replies = $this->phpbb_content_visibility->get_count('topic_posts', $row, $topic_forum_id) - 1;
+                // Correction for case of unapproved topic visible to poster
+                if ($replies < 0)
+                {
+                    $replies = 0;
+                }
 
                 if ($row['topic_status'] == ITEM_MOVED)
                 {
@@ -1203,7 +1228,10 @@ class listener implements EventSubscriberInterface
         if ($this->phpbbasic_enabled)
         {
             $navlinks = $event['navlinks'];
-            $navlinks['U_VIEW_FORUM'] = $this->viewforum_swap($navlinks['U_VIEW_FORUM']);
+            if (isset($navlinks['U_VIEW_FORUM']))
+            {
+                $navlinks['U_VIEW_FORUM'] = $this->viewforum_swap($navlinks['U_VIEW_FORUM']);
+            }
             $navlinks['PHPBBASIC_FORUM_BREADCRUMB'] = $navlinks['FORUM_ID'] == $this->phpbbasic_forumid;
             $event['navlinks'] = $navlinks;
             $navlinks_parents = $event['navlinks_parents'];

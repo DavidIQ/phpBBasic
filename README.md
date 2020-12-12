@@ -1,6 +1,6 @@
 [phpBBasic](https://www.davidiq.com/support/viewtopic.php?f=19&t=685)
 
-# phpBBasic Extension for phpBB 3.2.x & 3.3.x
+# phpBBasic Extension for phpBB 3.3.x
 phpBB Extension to add single forum setup to a phpBB installation, with all topics visible on the forum's index page.
 
 ## Installation
